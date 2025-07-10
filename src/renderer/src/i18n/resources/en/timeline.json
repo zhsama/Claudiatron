@@ -1,0 +1,53 @@
+{
+  "title": "Timeline",
+  "loading": "Loading timeline...",
+  "empty": "No checkpoints yet",
+  "noPrompt": "No prompt",
+  "tokens": "tokens",
+  "files": "files",
+  "checkpointCount": "{{count}} checkpoint",
+  "checkpointCount_plural": "{{count}} checkpoints",
+  "experimental": {
+    "title": "Experimental Feature",
+    "description": "Checkpointing may affect directory structure or cause data loss. Use with caution."
+  },
+  "badges": {
+    "current": "Current"
+  },
+  "actions": {
+    "checkpoint": "Checkpoint",
+    "cancel": "Cancel",
+    "createCheckpoint": "Create Checkpoint",
+    "close": "Close"
+  },
+  "tooltips": {
+    "restore": "Restore to this checkpoint",
+    "fork": "Fork from this checkpoint",
+    "compare": "Compare with another checkpoint"
+  },
+  "dialogs": {
+    "create": {
+      "title": "Create Checkpoint",
+      "description": "Save the current state of your session with an optional description.",
+      "descriptionLabel": "Description (optional)",
+      "placeholder": "e.g., Before major refactoring"
+    },
+    "comparison": {
+      "title": "Checkpoint Comparison",
+      "description": "Changes between \"{{from}}\" and \"{{to}}\""
+    }
+  },
+  "diff": {
+    "modifiedFiles": "Modified Files",
+    "addedFiles": "Added Files",
+    "deletedFiles": "Deleted Files"
+  },
+  "errors": {
+    "loadFailed": "Failed to load timeline",
+    "createFailed": "Failed to create checkpoint",
+    "restoreFailed": "Failed to restore checkpoint",
+    "compareFailed": "Failed to compare checkpoints"
+  },
+  "confirmRestore": "Restore to checkpoint \"{{checkpoint}}\"? Current state will be saved as a new checkpoint.",
+  "autoSaveBeforeRestore": "Auto-save before restore"
+}

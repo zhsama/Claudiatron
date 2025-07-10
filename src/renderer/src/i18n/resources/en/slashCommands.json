@@ -1,0 +1,119 @@
+{
+  "title": {
+    "main": "Slash Commands",
+    "project": "Project Slash Commands"
+  },
+  "description": {
+    "main": "Create custom commands to streamline your workflow",
+    "project": "Create custom commands for this project"
+  },
+  "buttons": {
+    "newCommand": "New Command",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "createFirst": "Create your first command",
+    "createFirstProject": "Create your first project command"
+  },
+  "search": {
+    "placeholder": "Search commands...",
+    "noResults": "No commands found"
+  },
+  "scope": {
+    "all": "All Commands",
+    "project": "Project",
+    "user": "User",
+    "projectCommands": "Project Commands",
+    "userCommands": "User Commands"
+  },
+  "form": {
+    "title": {
+      "create": "Create New Command",
+      "edit": "Edit Command"
+    },
+    "labels": {
+      "scope": "Scope",
+      "name": "Command Name*",
+      "namespace": "Namespace (Optional)",
+      "description": "Description (Optional)",
+      "content": "Command Content*",
+      "allowedTools": "Allowed Tools",
+      "examples": "Examples",
+      "preview": "Preview"
+    },
+    "placeholders": {
+      "name": "e.g., review, fix-issue",
+      "namespace": "e.g., frontend, backend",
+      "description": "Brief description of what this command does",
+      "content": "Enter the prompt content. Use $ARGUMENTS for dynamic values.",
+      "examples": "Choose a template to get started"
+    },
+    "help": {
+      "scope": {
+        "user": "Available across all projects",
+        "project": "Only available in this project"
+      },
+      "content": "Use $ARGUMENTS for user input, @filename for files, and !`command` for bash commands",
+      "examples": "Select a template to auto-fill the form",
+      "allowedTools": "Select which tools Claude can use with this command"
+    }
+  },
+  "examples": {
+    "review": {
+      "name": "review",
+      "description": "Review code for best practices"
+    },
+    "explain": {
+      "name": "explain",
+      "description": "Explain how something works"
+    },
+    "fixIssue": {
+      "name": "fix-issue",
+      "description": "Fix a specific issue"
+    },
+    "test": {
+      "name": "test",
+      "description": "Write tests for code"
+    },
+    "refactor": {
+      "name": "refactor",
+      "description": "Refactor code for better maintainability"
+    },
+    "document": {
+      "name": "document",
+      "description": "Add documentation to code"
+    }
+  },
+  "emptyState": {
+    "title": {
+      "main": "No commands created yet",
+      "project": "No project commands created yet",
+      "noResults": "No commands found"
+    }
+  },
+  "commands": {
+    "details": {
+      "showContent": "Show content",
+      "hideContent": "Hide content",
+      "arguments": "Arguments",
+      "tools": "tools",
+      "toolsCount": "{{count}} tool",
+      "toolsCount_plural": "{{count}} tools",
+      "bash": "Bash",
+      "files": "Files"
+    }
+  },
+  "delete": {
+    "title": "Delete Command",
+    "message": "Are you sure you want to delete this command?",
+    "warning": "This action cannot be undone. The command file will be permanently deleted."
+  },
+  "errors": {
+    "loadFailed": "Failed to load commands",
+    "saveFailed": "Failed to save command",
+    "deleteFailed": "Failed to delete command"
+  }
+}

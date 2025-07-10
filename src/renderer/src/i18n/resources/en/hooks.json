@@ -1,0 +1,66 @@
+{
+  "title": "Hooks Configuration",
+  "description": "Configure shell commands to execute at various points in Claude Code's lifecycle.",
+  "scope": {
+    "project": "Project",
+    "local": "Local",
+    "user": "User"
+  },
+  "buttons": {
+    "templates": "Templates",
+    "addHook": "Add Hook",
+    "addCommand": "Add Command",
+    "addMatcher": "Add Matcher",
+    "addAnother": "Add Another",
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "events": {
+    "PreToolUse": {
+      "label": "Pre Tool Use",
+      "description": "Runs before tool calls, can block and provide feedback"
+    },
+    "PostToolUse": {
+      "label": "Post Tool Use",
+      "description": "Runs after successful tool completion"
+    },
+    "Notification": {
+      "label": "Notification",
+      "description": "Customizes notifications when Claude needs attention"
+    },
+    "Stop": {
+      "label": "Stop",
+      "description": "Runs when Claude finishes responding"
+    },
+    "SubagentStop": {
+      "label": "Subagent Stop",
+      "description": "Runs when a Claude subagent (Task) finishes"
+    }
+  },
+  "messages": {
+    "noHooksConfigured": "No hooks configured for this event",
+    "noCommandsAdded": "No commands added yet",
+    "hasUnsavedChanges": "You have unsaved changes. Click Save to persist them.",
+    "loadingConfiguration": "Loading hooks configuration...",
+    "validationErrors": "Validation Errors:",
+    "securityWarnings": "Security Warnings:",
+    "localScopeNotCommitted": "These settings are not committed to version control."
+  },
+  "fields": {
+    "pattern": "Pattern",
+    "patternTooltip": "Tool name pattern (regex supported). Leave empty to match all tools.",
+    "patternPlaceholder": "e.g., Bash, Edit|Write, mcp__.*",
+    "commands": "Commands",
+    "commandPlaceholder": "Enter shell command...",
+    "timeout": "Timeout",
+    "timeoutUnit": "seconds",
+    "commonPatterns": "Common patterns",
+    "custom": "Custom"
+  },
+  "templates": {
+    "title": "Hook Templates",
+    "description": "Choose a pre-configured hook template to get started quickly",
+    "chooseTemplate": "Choose a pre-configured hook template to get started quickly",
+    "matcher": "Matcher"
+  }
+}

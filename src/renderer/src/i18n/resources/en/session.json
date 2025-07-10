@@ -1,0 +1,89 @@
+{
+  "timeline": {
+    "title": "Session Timeline"
+  },
+  "tooltips": {
+    "checkpointSettings": "Checkpoint Settings",
+    "timelineNavigator": "Timeline Navigator"
+  },
+  "tokens": "tokens",
+  "tokensUsage": "Tokens: {{input}} in, {{output}} out",
+  "actions": {
+    "copyOutput": "Copy Output",
+    "copyAsMarkdown": "Copy as Markdown",
+    "copyAsJsonl": "Copy as JSONL",
+    "cancel": "Cancel",
+    "createFork": "Create Fork",
+    "save": "Save",
+    "cleanup": "Cleanup",
+    "close": "Close"
+  },
+  "navigation": {
+    "hooks": "Hooks",
+    "commands": "Commands"
+  },
+  "status": {
+    "loadingHistory": "Loading session history...",
+    "initializing": "Initializing Claude Code...",
+    "noProject": "No project selected",
+    "saving": "Saving...",
+    "loading": "Loading..."
+  },
+  "ui": {
+    "queuedPrompts": "Queued Prompts"
+  },
+  "labels": {
+    "projectDirectory": "Project Directory"
+  },
+  "placeholders": {
+    "projectPath": "/path/to/your/project",
+    "forkName": "e.g., Alternative approach"
+  },
+  "dialogs": {
+    "forkSession": {
+      "title": "Fork Session",
+      "description": "Create a new session branch from the selected checkpoint.",
+      "sessionName": "New Session Name"
+    },
+    "slashCommands": {
+      "title": "Slash Commands",
+      "description": "Manage project-specific slash commands for {{projectPath}}"
+    }
+  },
+  "checkpointSettings": {
+    "title": "Checkpoint Settings",
+    "autoCheckpoint": "Automatic Checkpoints",
+    "autoCheckpointDescription": "Automatically create checkpoints based on the selected strategy",
+    "strategy": "Strategy",
+    "strategyDescription": "How checkpoints are created",
+    "keepCount": "Keep Count",
+    "keepCountDescription": "Number of checkpoints to keep (older ones will be cleaned up)",
+    "totalCheckpoints": "Total Checkpoints",
+    "storageManagement": "Storage Management",
+    "totalCheckpointsCount": "Total checkpoints: {{count}}",
+    "keepRecentCheckpoints": "Keep Recent Checkpoints",
+    "keepRecentDescription": "Remove old checkpoints, keeping only the most recent {{count}}",
+    "warning": {
+      "title": "Experimental Feature",
+      "description": "Checkpointing may affect directory structure or cause data loss. Use with caution."
+    },
+    "strategies": {
+      "manual": "Manual Only",
+      "per_prompt": "After Each Prompt",
+      "per_tool_use": "After Tool Use",
+      "smart": "Smart (Recommended)"
+    },
+    "strategyDescriptions": {
+      "manual": "Checkpoints will only be created manually",
+      "per_prompt": "A checkpoint will be created after each user prompt",
+      "per_tool_use": "A checkpoint will be created after each tool use",
+      "smart": "Checkpoints will be created after destructive operations"
+    },
+    "messages": {
+      "settingsSaved": "Settings saved successfully",
+      "checkpointsRemoved": "Removed {{count}} old checkpoints",
+      "saveFailed": "Failed to save settings",
+      "cleanupFailed": "Failed to cleanup checkpoints"
+    }
+  }
+}

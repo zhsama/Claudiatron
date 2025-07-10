@@ -1,0 +1,89 @@
+{
+  "timeline": {
+    "title": "会话时间线"
+  },
+  "tooltips": {
+    "checkpointSettings": "检查点设置",
+    "timelineNavigator": "时间线导航"
+  },
+  "tokens": "Token",
+  "tokensUsage": "Token: {{input}} 输入, {{output}} 输出",
+  "actions": {
+    "copyOutput": "复制输出",
+    "copyAsMarkdown": "复制为 Markdown",
+    "copyAsJsonl": "复制为 JSONL",
+    "cancel": "取消",
+    "createFork": "创建分支",
+    "save": "保存",
+    "cleanup": "清理",
+    "close": "关闭"
+  },
+  "navigation": {
+    "hooks": "钩子",
+    "commands": "命令"
+  },
+  "status": {
+    "loadingHistory": "加载会话历史...",
+    "initializing": "初始化 Claude Code...",
+    "noProject": "未选择项目",
+    "saving": "保存中...",
+    "loading": "加载中..."
+  },
+  "ui": {
+    "queuedPrompts": "排队提示"
+  },
+  "labels": {
+    "projectDirectory": "项目目录"
+  },
+  "placeholders": {
+    "projectPath": "/项目/路径",
+    "forkName": "例如: 替代方案"
+  },
+  "dialogs": {
+    "forkSession": {
+      "title": "分支会话",
+      "description": "从选定的检查点创建新的会话分支。",
+      "sessionName": "新会话名称"
+    },
+    "slashCommands": {
+      "title": "斜杠命令",
+      "description": "管理 {{projectPath}} 的项目特定斜杠命令"
+    }
+  },
+  "checkpointSettings": {
+    "title": "检查点设置",
+    "autoCheckpoint": "自动检查点",
+    "autoCheckpointDescription": "根据选定策略自动创建检查点",
+    "strategy": "策略",
+    "strategyDescription": "检查点创建方式",
+    "keepCount": "保留数量",
+    "keepCountDescription": "要保留的检查点数量（较旧的将被清理）",
+    "totalCheckpoints": "总检查点数",
+    "storageManagement": "存储管理",
+    "totalCheckpointsCount": "总检查点数: {{count}}",
+    "keepRecentCheckpoints": "保留最近检查点",
+    "keepRecentDescription": "删除旧检查点，仅保留最近的 {{count}} 个",
+    "warning": {
+      "title": "实验性功能",
+      "description": "检查点功能可能会影响目录结构或导致数据丢失。请谨慎使用。"
+    },
+    "strategies": {
+      "manual": "仅手动",
+      "per_prompt": "每次提示后",
+      "per_tool_use": "工具使用后",
+      "smart": "智能（推荐）"
+    },
+    "strategyDescriptions": {
+      "manual": "检查点将仅手动创建",
+      "per_prompt": "每次用户提示后将创建检查点",
+      "per_tool_use": "每次工具使用后将创建检查点",
+      "smart": "在破坏性操作后将创建检查点"
+    },
+    "messages": {
+      "settingsSaved": "设置保存成功",
+      "checkpointsRemoved": "已删除 {{count}} 个旧检查点",
+      "saveFailed": "保存设置失败",
+      "cleanupFailed": "清理检查点失败"
+    }
+  }
+}

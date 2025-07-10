@@ -1,0 +1,154 @@
+{
+  "title": "MCP 服务器",
+  "description": "管理模型上下文协议服务器",
+  "tabs": {
+    "servers": "服务器",
+    "addServer": "添加服务器",
+    "importExport": "导入/导出"
+  },
+  "serverList": {
+    "title": "MCP服务器列表",
+    "serverCount": "已配置 {{count}} 个服务器",
+    "serverCount_plural": "已配置 {{count}} 个服务器",
+    "refresh": "刷新",
+    "empty": {
+      "title": "未配置 MCP 服务器",
+      "description": "添加服务器以开始使用模型上下文协议"
+    },
+    "scope": {
+      "local": "本地（项目专用）",
+      "project": "项目（通过 .mcp.json 共享）",
+      "user": "用户（所有项目）"
+    },
+    "status": {
+      "running": "运行中"
+    },
+    "actions": {
+      "showFull": "显示完整",
+      "hide": "隐藏",
+      "copy": "复制",
+      "copied": "已复制！"
+    },
+    "details": {
+      "command": "命令",
+      "arguments": "参数",
+      "url": "URL",
+      "environmentVariables": "环境变量"
+    }
+  },
+  "addServer": {
+    "title": "添加 MCP 服务器",
+    "description": "配置新的模型上下文协议服务器",
+    "transport": {
+      "stdio": "Stdio",
+      "sse": "SSE"
+    },
+    "fields": {
+      "name": {
+        "label": "服务器名称",
+        "placeholder": "my-server",
+        "description": "用于标识此服务器的唯一名称"
+      },
+      "command": {
+        "label": "命令",
+        "placeholder": "/path/to/server",
+        "description": "执行服务器的命令"
+      },
+      "args": {
+        "label": "参数（可选）",
+        "placeholder": "arg1 arg2 arg3",
+        "description": "空格分隔的命令参数"
+      },
+      "url": {
+        "label": "URL",
+        "placeholder": "https://example.com/sse-endpoint",
+        "description": "SSE 端点 URL"
+      },
+      "scope": {
+        "label": "范围",
+        "placeholder": "选择范围",
+        "options": {
+          "local": "本地（仅限此项目）",
+          "project": "项目（通过 .mcp.json 共享）",
+          "user": "用户（所有项目）"
+        }
+      },
+      "environmentVariables": {
+        "label": "环境变量",
+        "add": "添加变量",
+        "keyPlaceholder": "KEY",
+        "valuePlaceholder": "value"
+      }
+    },
+    "actions": {
+      "addStdio": "添加Stdio类型的MCP服务器",
+      "addSse": "添加 SSE 服务器",
+      "adding": "正在添加服务器..."
+    },
+    "examples": {
+      "title": "示例命令",
+      "postgres": "• Postgres: /path/to/postgres-mcp-server --connection-string \"postgresql://...\"",
+      "weather": "• Weather API: /usr/local/bin/weather-cli --api-key ABC123",
+      "sseServer": "• SSE 服务器: https://api.example.com/mcp/stream"
+    },
+    "validation": {
+      "nameRequired": "服务器名称是必需的",
+      "commandRequired": "命令是必需的",
+      "urlRequired": "URL 是必需的"
+    }
+  },
+  "importExport": {
+    "title": "导入和导出",
+    "description": "从其他来源导入 MCP 服务器或导出您的配置",
+    "importScope": {
+      "label": "导入范围",
+      "description": "选择从 JSON 文件导入的服务器保存位置"
+    },
+    "importDesktop": {
+      "title": "从 Claude Desktop 导入",
+      "description": "自动从 Claude Desktop 导入所有 MCP 服务器。安装到用户范围（在所有项目中可用）。",
+      "button": "从 Claude Desktop 导入",
+      "importing": "正在导入..."
+    },
+    "importJson": {
+      "title": "从 JSON 导入",
+      "description": "从 JSON 文件导入服务器配置",
+      "button": "选择 JSON 文件",
+      "importing": "正在导入..."
+    },
+    "export": {
+      "title": "导出配置",
+      "description": "导出您的 MCP 服务器配置",
+      "button": "导出（即将推出）"
+    },
+    "mcpServer": {
+      "title": "将 Claude Code 用作 MCP 服务器",
+      "description": "启动 Claude Code 作为其他应用程序可以连接的 MCP 服务器",
+      "button": "启动 MCP 服务器"
+    },
+    "jsonExamples": {
+      "title": "JSON 格式示例",
+      "singleServer": "单个服务器：",
+      "multipleServers": "多个服务器（.mcp.json 格式）："
+    },
+    "messages": {
+      "exportComingSoon": "导出功能即将推出！",
+      "mcpServerStarted": "Claude Code MCP 服务器已启动。现在您可以从其他应用程序连接到它。",
+      "mcpServerFailed": "无法启动 Claude Code 作为 MCP 服务器",
+      "invalidJson": "无效的 JSON 文件。请检查格式。",
+      "unrecognizedFormat": "无法识别的 JSON 格式。需要 MCP 服务器配置。",
+      "importJsonFailed": "无法导入 JSON 文件",
+      "importDesktopFailed": "无法从 Claude Desktop 导入",
+      "importSuccess": "成功导入：{{servers}}",
+      "importPartialSuccess": "已导入 {{imported}} 个服务器，{{failed}} 个失败",
+      "importPartialSuccess_plural": "已导入 {{imported}} 个服务器，{{failed}} 个失败",
+      "importFailures": "无法导入某些服务器：\\n{{failures}}",
+      "enterServerName": "为此服务器输入名称："
+    }
+  },
+  "messages": {
+    "serverAdded": "MCP 服务器添加成功！",
+    "serverRemoved": "服务器 \"{{name}}\" 删除成功！",
+    "loadFailed": "无法加载 MCP 服务器。请确保已安装 Claude Code。"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "title": "Usage Dashboard",
+  "subtitle": "Track your Claude Code usage and costs",
+  "dateRange": {
+    "allTime": "All Time",
+    "last30Days": "Last 30 Days",
+    "last7Days": "Last 7 Days"
+  },
+  "loading": "Loading usage statistics...",
+  "error": "Failed to load usage statistics. Please try again.",
+  "tryAgain": "Try Again",
+  "summary": {
+    "totalCost": "Total Cost",
+    "totalSessions": "Total Sessions",
+    "totalTokens": "Total Tokens",
+    "avgCostPerRequest": "Avg Cost/Request",
+    "apiRequests": "API requests",
+    "perApiRequest": "Per API request"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "models": "By Model",
+    "projects": "By Project",
+    "sessions": "By Session",
+    "timeline": "Timeline"
+  },
+  "sections": {
+    "tokenBreakdown": "Token Breakdown",
+    "mostUsedModels": "Most Used Models",
+    "topProjects": "Top Projects",
+    "usageByModel": "Usage by Model",
+    "usageByProject": "Usage by Project",
+    "usageBySession": "Usage by Session",
+    "dailyUsage": "Daily Usage",
+    "dailyUsageOverTime": "Daily Usage Over Time"
+  },
+  "tokens": {
+    "input": "Input Tokens",
+    "output": "Output Tokens",
+    "cacheWrite": "Cache Write",
+    "cacheRead": "Cache Read",
+    "inputShort": "Input",
+    "outputShort": "Output",
+    "cacheWriteShort": "Cache W",
+    "cacheReadShort": "Cache R",
+    "tokens": "tokens"
+  },
+  "details": {
+    "sessions": "sessions",
+    "session": "session",
+    "models": "models",
+    "model": "model",
+    "cost": "Cost",
+    "perSession": "/session"
+  },
+  "noData": {
+    "noSessions": "No session data available",
+    "noUsageData": "No usage data available for the selected period"
+  }
+}

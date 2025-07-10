@@ -1,0 +1,28 @@
+{
+  "projects": {
+    "loadFailed": "Failed to load projects. Please ensure ~/.claude directory exists.",
+    "notFound": "Project not found",
+    "accessDenied": "Access denied to project directory"
+  },
+  "sessions": {
+    "loadFailed": "Failed to load sessions for this project.",
+    "createFailed": "Failed to create new session",
+    "deleteFailed": "Failed to delete session"
+  },
+  "claude": {
+    "binaryNotFound": "Claude binary not found. Please install Claude Code.",
+    "invalidPath": "Invalid Claude binary path",
+    "executionFailed": "Failed to execute Claude command",
+    "stillResponding": "Claude is still responding. If you navigate away, Claude will continue running in the background.\n\nYou can return to this session from the Projects view.\n\nDo you want to continue?"
+  },
+  "network": {
+    "connectionFailed": "Connection failed",
+    "timeout": "Request timed out",
+    "serverError": "Server error occurred"
+  },
+  "general": {
+    "unexpected": "An unexpected error occurred",
+    "fileNotFound": "File not found",
+    "permissionDenied": "Permission denied"
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "button": {
+    "newClaudeSession": "新建会话",
+    "backToHome": "← 返回首页",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "refresh": "刷新",
+    "settings": "设置",
+    "about": "关于",
+    "help": "帮助",
+    "fileABug": "报告问题"
+  },
+  "navigation": {
+    "ccAgents": {
+      "title": "CC 代理",
+      "description": "管理您的 Claude Code 代理"
+    },
+    "ccProjects": {
+      "title": "CC 项目",
+      "description": "浏览您的 Claude Code 项目"
+    },
+    "usageDashboard": {
+      "title": "使用统计",
+      "description": "查看您的使用情况统计"
+    },
+    "claudeMd": {
+      "title": "CLAUDE.md",
+      "description": "编辑项目配置"
+    },
+    "mcp": {
+      "title": "MCP",
+      "description": "管理 MCP 服务器"
+    },
+    "settings": {
+      "title": "设置",
+      "description": "配置应用程序设置"
+    }
+  },
+  "welcome": {
+    "title": {
+      "welcome": "欢迎来到 Claudia",
+      "tron": "tron"
+    },
+    "subtitle": "您的 Claude Code 界面"
+  },
+  "projects": {
+    "title": {
+      "main": "CC 项目"
+    },
+    "description": {
+      "browse": "浏览您的 Claude Code 会话"
+    },
+    "message": {
+      "noProjectsFound": "在 ~/.claude/projects 中未找到项目",
+      "loading": "正在加载项目..."
+    }
+  },
+  "titleBar": {
+    "appName": "Claudiatron",
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "关闭"
+  },
+  "toast": {
+    "success": {
+      "claudeBinaryPathSaved": "Claude 二进制文件路径保存成功"
+    }
+  },
+  "topbar": {
+    "status": {
+      "checking": "检查中...",
+      "claudeCode": "Claude Code",
+      "notFound": "未找到 Claude Code",
+      "selectInstallation": "选择 Claude 安装",
+      "installClaudeCode": "安装 Claude Code"
+    },
+    "buttons": {
+      "usageDashboard": "使用统计",
+      "claudeMd": "CLAUDE.md",
+      "mcp": "MCP",
+      "settings": "设置",
+      "about": "关于"
+    }
+  },
+  "chat": {
+    "composePrompt": "编写您的提示",
+    "typePromptHere": "在此输入您的提示...",
+    "askClaude": "向 Claude 提任何问题...",
+    "dropImagesHere": "在此放置图片...",
+    "model": "模型",
+    "stop": "停止",
+    "models": {
+      "sonnet": {
+        "description": "更快速，适用于大多数任务"
+      },
+      "opus": {
+        "description": "更强大，适用于复杂任务"
+      }
+    },
+    "thinking": {
+      "label": "思考模式",
+      "auto": {
+        "name": "自动",
+        "description": "让 Claude 决定"
+      },
+      "think": {
+        "name": "思考",
+        "description": "基础推理"
+      },
+      "thinkHard": {
+        "name": "深度思考",
+        "description": "深度分析"
+      },
+      "thinkHarder": {
+        "name": "更深度思考",
+        "description": "广泛推理"
+      },
+      "ultrathink": {
+        "name": "超级思考",
+        "description": "最大计算量"
+      }
+    },
+    "shortcuts": {
+      "enterToSend": "按 Enter 发送，Shift+Enter 换行",
+      "atMentionFiles": "@ 提及文件",
+      "slashCommands": "/ 使用命令",
+      "dragDropImages": "拖拽或粘贴图片"
+    }
+  },
+  "sessions": {
+    "count": "会话",
+    "count_plural": "会话",
+    "firstMessage": "首条消息",
+    "hasTodo": "有待办"
+  },
+  "memories": {
+    "title": "CLAUDE.md 记忆",
+    "noFiles": "此项目中未找到 CLAUDE.md 文件",
+    "modified": "修改于"
+  },
+  "slashCommands": {
+    "title": "斜杠命令",
+    "searching": "搜索中",
+    "tabs": {
+      "default": "默认",
+      "custom": "自定义"
+    },
+    "loading": "正在加载命令...",
+    "noCommandsFound": "未找到命令",
+    "noCustomCommands": "无可用的自定义命令",
+    "createCommandsIn": "在以下位置创建命令",
+    "or": "或",
+    "navigation": "↑↓ 导航 • Enter 选择 • Esc 关闭"
+  },
+  "filePicker": {
+    "navigation": "↑↓ 导航 • Enter 选择 • → 进入目录 • ← 返回 • Esc 关闭"
+  }
+}

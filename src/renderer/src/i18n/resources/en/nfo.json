@@ -1,0 +1,38 @@
+{
+  "windowTitle": "CLAUDIATRON.NFO",
+  "header": "CLAUDIATRON v0.1.0",
+  "subheader": "[ A STRATEGIC PROJECT BY ASTERISK ]",
+  "asteriskTagline": "A strategic project by Asterisk",
+  "sections": {
+    "credits": "━━━ CREDITS ━━━",
+    "dependencies": "━━━ DEPENDENCIES ━━━",
+    "specialThanks": "━━━ SPECIAL THANKS ━━━"
+  },
+  "credits": {
+    "poweredBy": "POWERED BY",
+    "claudeCode": "CLAUDE CODE",
+    "claudeCodeDesc": "The Ultimate Coding Assistant",
+    "mcpProtocol": "MCP PROTOCOL",
+    "mcpProtocolDesc": "Model Context Protocol"
+  },
+  "dependencies": {
+    "runtime": "RUNTIME",
+    "uiFramework": "UI FRAMEWORK",
+    "styling": "STYLING",
+    "animations": "ANIMATIONS",
+    "buildTool": "BUILD TOOL",
+    "packageManager": "PACKAGE MANAGER"
+  },
+  "thanks": {
+    "openSource": "To the open source community",
+    "betaTesters": "To all the beta testers",
+    "believers": "To everyone who believed in this project"
+  },
+  "ascii": {
+    "welcome": "Welcome to Claude Code"
+  },
+  "footer": {
+    "sharing": "Remember: Sharing is caring!",
+    "support": "Support the developers!"
+  }
+}

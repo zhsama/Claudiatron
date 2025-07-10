@@ -1,0 +1,233 @@
+/* Custom Animations and Effects */
+
+/* Custom utilities */
+@utility animate-in {
+  animation-name: enter;
+  animation-duration: 150ms;
+  animation-fill-mode: both;
+}
+
+@utility animate-out {
+  animation-name: exit;
+  animation-duration: 150ms;
+  animation-fill-mode: both;
+}
+
+@utility line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Keyframe Animations */
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
+      scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1))
+      rotate(var(--tw-enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0)
+      scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1))
+      rotate(var(--tw-exit-rotate, 0));
+  }
+}
+
+/* Rotating symbol animation */
+@keyframes rotate-symbol {
+  0% {
+    content: '◐';
+    transform: scale(1);
+  }
+  25% {
+    content: '◓';
+    transform: scale(1);
+  }
+  50% {
+    content: '◑';
+    transform: scale(1);
+  }
+  75% {
+    content: '◒';
+    transform: scale(1);
+  }
+  100% {
+    content: '◐';
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.rotating-symbol {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  animation: fade-in 0.2s ease-out;
+  font-weight: normal;
+  font-size: 1.5rem;
+  position: relative;
+  top: -2px;
+}
+
+.rotating-symbol::before {
+  content: '◐';
+  animation: rotate-symbol 1.6s steps(4, end) infinite;
+  display: inline-block;
+  font-size: inherit;
+  line-height: 1;
+  vertical-align: baseline;
+  transform-origin: center;
+}
+
+/* Shimmer hover effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transition: left 0.5s;
+}
+
+.shimmer-hover:hover::before {
+  left: 100%;
+  animation: shimmer 0.5s;
+}
+
+/* Trailing border effect */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes trail-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+.trailing-border {
+  position: relative;
+  background: var(--color-card);
+  z-index: 0;
+  overflow: visible;
+}
+
+.trailing-border::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0%,
+    transparent 85%,
+    #d97757 90%,
+    #ff9a7a 92.5%,
+    #d97757 95%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.trailing-border:hover::after {
+  opacity: 1;
+  animation: trail-rotate 2s linear infinite;
+}
+
+.trailing-border > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* NFO Credits Scanlines Animation */
+@keyframes scanlines {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scanlines {
+  animation: scanlines 8s linear infinite;
+}
+
+/* Screenshot Shutter Animation */
+@keyframes shutterFlash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.shutter-flash {
+  animation: shutterFlash 0.5s ease-in-out;
+}
+
+/* Image Move to Input Animation */
+@keyframes moveToInput {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.3) translateY(50%);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.1) translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.image-move-to-input {
+  animation: moveToInput 0.8s ease-in-out forwards;
+}

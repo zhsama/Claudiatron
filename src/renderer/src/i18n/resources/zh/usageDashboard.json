@@ -1,0 +1,60 @@
+{
+  "title": "使用统计",
+  "subtitle": "跟踪您的 Claude Code 使用情况和成本",
+  "dateRange": {
+    "allTime": "所有时间",
+    "last30Days": "最近30天",
+    "last7Days": "最近7天"
+  },
+  "loading": "正在加载使用统计...",
+  "error": "加载使用统计失败。请重试。",
+  "tryAgain": "重试",
+  "summary": {
+    "totalCost": "总花费",
+    "totalSessions": "总会话数",
+    "totalTokens": "总令牌数",
+    "avgCostPerRequest": "平均每次请求成本",
+    "apiRequests": "API请求",
+    "perApiRequest": "每次API请求"
+  },
+  "tabs": {
+    "overview": "概览",
+    "models": "按模型",
+    "projects": "按项目",
+    "sessions": "按会话",
+    "timeline": "时间线"
+  },
+  "sections": {
+    "tokenBreakdown": "Token 详情",
+    "mostUsedModels": "最常用模型",
+    "topProjects": "热门项目",
+    "usageByModel": "按模型使用情况",
+    "usageByProject": "按项目使用情况",
+    "usageBySession": "按会话使用情况",
+    "dailyUsage": "每日使用",
+    "dailyUsageOverTime": "每日使用趋势"
+  },
+  "tokens": {
+    "input": "输入令牌",
+    "output": "输出令牌",
+    "cacheWrite": "缓存写入",
+    "cacheRead": "缓存读取",
+    "inputShort": "输入",
+    "outputShort": "输出",
+    "cacheWriteShort": "缓存写",
+    "cacheReadShort": "缓存读",
+    "tokens": "令牌"
+  },
+  "details": {
+    "sessions": "会话",
+    "session": "会话",
+    "models": "模型",
+    "model": "模型",
+    "cost": "花费",
+    "perSession": " / 会话"
+  },
+  "noData": {
+    "noSessions": "无会话数据",
+    "noUsageData": "所选时间段无使用数据"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "钩子配置",
+  "description": "配置在 Claude Code 生命周期各个节点执行的 shell 命令。",
+  "scope": {
+    "project": "项目",
+    "local": "本地",
+    "user": "用户"
+  },
+  "buttons": {
+    "templates": "模板",
+    "addHook": "添加钩子",
+    "addCommand": "添加命令",
+    "addMatcher": "添加匹配器",
+    "addAnother": "添加另一个",
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "events": {
+    "PreToolUse": {
+      "label": "工具使用前",
+      "description": "在工具调用前运行，可以阻止并提供反馈"
+    },
+    "PostToolUse": {
+      "label": "工具使用后",
+      "description": "在工具成功完成后运行"
+    },
+    "Notification": {
+      "label": "通知",
+      "description": "当 Claude 需要注意时自定义通知"
+    },
+    "Stop": {
+      "label": "停止",
+      "description": "当 Claude 完成响应时运行"
+    },
+    "SubagentStop": {
+      "label": "子代理停止",
+      "description": "当 Claude 子代理（任务）完成时运行"
+    }
+  },
+  "messages": {
+    "noHooksConfigured": "此事件尚未配置钩子",
+    "noCommandsAdded": "尚未添加命令",
+    "hasUnsavedChanges": "您有未保存的更改。点击保存以保持更改。",
+    "loadingConfiguration": "正在加载钩子配置...",
+    "validationErrors": "验证错误：",
+    "securityWarnings": "安全警告：",
+    "localScopeNotCommitted": "这些设置不会提交到版本控制。"
+  },
+  "fields": {
+    "pattern": "匹配模式",
+    "patternTooltip": "工具名称匹配模式（支持正则表达式）。留空以匹配所有工具。",
+    "patternPlaceholder": "例如：Bash, Edit|Write, mcp__.*",
+    "commands": "命令",
+    "commandPlaceholder": "输入 shell 命令...",
+    "timeout": "超时",
+    "timeoutUnit": "秒",
+    "commonPatterns": "常用模式",
+    "custom": "自定义"
+  },
+  "templates": {
+    "title": "钩子模板",
+    "description": "选择预配置的钩子模板以快速开始",
+    "chooseTemplate": "选择预配置的钩子模板以快速开始",
+    "matcher": "匹配器"
+  }
+}

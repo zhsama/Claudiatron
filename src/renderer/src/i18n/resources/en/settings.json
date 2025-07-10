@@ -1,0 +1,377 @@
+{
+  "title": "Settings",
+  "description": "Configure Claude Code preferences",
+  "actions": {
+    "save": "Save Settings",
+    "saving": "Saving..."
+  },
+  "tabs": {
+    "general": "General",
+    "permissions": "Permissions",
+    "environment": "Environment",
+    "advanced": "Advanced",
+    "hooks": "Hooks",
+    "commands": "Commands",
+    "storage": "Storage"
+  },
+  "general": {
+    "title": "General Settings",
+    "language": {
+      "label": "Language",
+      "description": "Select your preferred language"
+    },
+    "coAuthoredBy": {
+      "label": "Include \"Co-authored by Claude\"",
+      "description": "Add Claude attribution to git commits and pull requests"
+    },
+    "verboseOutput": {
+      "label": "Verbose Output",
+      "description": "Show full bash and command outputs"
+    },
+    "claudeInstallation": {
+      "title": "Claude Code Installation",
+      "description": "Choose your preferred Claude Code installation. Bundled version is recommended for best compatibility.",
+      "loadingMessage": "Loading available installations...",
+      "availableInstallations": "Available Installations",
+      "selectPlaceholder": "Select Claude installation",
+      "selectedInstallation": "Selected Installation",
+      "systemInstallations": "System Installations",
+      "customInstallations": "Custom Installations",
+      "unknownVersion": "Unknown",
+      "installationTypes": {
+        "bundled": "Bundled",
+        "system": "System",
+        "custom": "Custom"
+      },
+      "details": {
+        "path": "Path",
+        "actualLocation": "Actual Location",
+        "source": "Source",
+        "version": "Version",
+        "nodeVersion": "Node Version"
+      },
+      "actions": {
+        "save": "Save Selection",
+        "saving": "Saving...",
+        "retry": "Retry Detection",
+        "viewGuide": "View Installation Guide"
+      },
+      "errors": {
+        "notFound": "No Claude Code installations found. Please install Claude Code to continue.",
+        "loadFailed": "Failed to load Claude installations"
+      },
+      "empty": {
+        "title": "No Claude Code installations detected",
+        "description": "Install Claude Code to get started"
+      },
+      "installGuide": {
+        "title": "To install Claude Code:",
+        "windowsNote": "On Windows, install within WSL for best compatibility"
+      }
+    },
+    "chatTranscriptRetention": {
+      "label": "Chat Transcript Retention (days)",
+      "description": "How long to retain chat transcripts locally (default: 30 days)"
+    }
+  },
+  "permissions": {
+    "title": "Permission Rules",
+    "description": "Control which tools Claude Code can use without manual approval",
+    "allowRules": {
+      "label": "Allow Rules",
+      "addRule": "Add Rule",
+      "placeholder": "e.g., Bash(npm run test:*)",
+      "noRules": "No allow rules configured. Claude will ask for approval for all tools."
+    },
+    "denyRules": {
+      "label": "Deny Rules",
+      "addRule": "Add Rule",
+      "placeholder": "e.g., Bash(curl:*)",
+      "noRules": "No deny rules configured."
+    },
+    "examples": {
+      "title": "Examples:",
+      "bashAll": "Allow all bash commands",
+      "bashExact": "Allow exact command",
+      "bashPrefix": "Allow commands with prefix",
+      "readFile": "Allow reading specific file",
+      "editDocs": "Allow editing files in docs directory"
+    }
+  },
+  "environment": {
+    "title": "Environment Variables",
+    "description": "Environment variables applied to every Claude Code session",
+    "addVariable": "Add Variable",
+    "noVariables": "No environment variables configured.",
+    "keyPlaceholder": "KEY",
+    "valuePlaceholder": "value",
+    "commonVariables": {
+      "title": "Common variables:",
+      "telemetry": "Enable/disable telemetry (0 or 1)",
+      "model": "Custom model name",
+      "costWarnings": "Disable cost warnings (1)"
+    }
+  },
+  "advanced": {
+    "title": "Advanced Settings",
+    "description": "Additional configuration options for advanced users",
+    "apiKeyHelper": {
+      "label": "API Key Helper Script",
+      "placeholder": "/path/to/generate_api_key.sh",
+      "description": "Custom script to generate auth values for API requests"
+    },
+    "rawSettings": {
+      "label": "Raw Settings (JSON)",
+      "description": "This shows the raw JSON that will be saved to ~/.claude/settings.json"
+    }
+  },
+  "hooks": {
+    "title": "User Hooks",
+    "description": "Configure hooks that apply to all Claude Code sessions for your user account. These are stored in",
+    "configFile": "~/.claude/settings.json",
+    "scope": {
+      "project": "Project",
+      "local": "Local",
+      "user": "User",
+      "suffix": "Scope"
+    },
+    "buttons": {
+      "templates": "Templates",
+      "addHook": "Add Hook",
+      "addCommand": "Add Command",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "events": {
+      "PreToolUse": {
+        "label": "Pre Tool Use",
+        "description": "Runs before tool calls, can block and provide feedback"
+      },
+      "PostToolUse": {
+        "label": "Post Tool Use",
+        "description": "Runs after tool calls complete"
+      },
+      "Notification": {
+        "label": "Notification",
+        "description": "Runs when Claude sends a notification"
+      },
+      "Stop": {
+        "label": "Stop",
+        "description": "Runs when Claude session stops"
+      },
+      "SubagentStop": {
+        "label": "Subagent Stop",
+        "description": "Runs when a Claude subagent (Task) finishes"
+      }
+    },
+    "fields": {
+      "pattern": "Pattern",
+      "commands": "Commands",
+      "timeout": "Timeout",
+      "seconds": "seconds",
+      "timeoutPlaceholder": "60"
+    },
+    "messages": {
+      "noHooksConfigured": "No hooks configured for this event",
+      "loadingConfiguration": "Loading hooks configuration...",
+      "localScopeNotCommitted": "Local scope hooks are not committed to version control",
+      "validationErrors": "Validation errors found",
+      "validationWarnings": "Validation warnings found"
+    },
+    "errors": {
+      "loadFailed": "Failed to load hooks configuration",
+      "saveFailed": "Failed to save hooks"
+    },
+    "templates": {
+      "title": "Hook Templates",
+      "description": "Choose a template to get started",
+      "categories": {
+        "git": "Git Integration",
+        "testing": "Testing",
+        "deployment": "Deployment",
+        "monitoring": "Monitoring"
+      }
+    }
+  },
+  "commands": {
+    "title": "Slash Commands",
+    "description": "Manage custom slash commands",
+    "projectTitle": "Project Slash Commands",
+    "projectDescription": "Manage slash commands for this project",
+    "groups": {
+      "project": "Project Commands",
+      "user": "User Commands"
+    },
+    "actions": {
+      "newCommand": "New Command",
+      "showContent": "Show content",
+      "hideContent": "Hide content"
+    },
+    "search": {
+      "placeholder": "Search commands..."
+    },
+    "filter": {
+      "allCommands": "All Commands",
+      "project": "Project",
+      "user": "User"
+    },
+    "badges": {
+      "arguments": "Args",
+      "bash": "Bash",
+      "files": "Files"
+    },
+    "details": {
+      "tools": "tool",
+      "tools_plural": "tools"
+    },
+    "empty": {
+      "noResults": "No commands found matching your search.",
+      "noCommands": "No commands have been created yet.",
+      "noProjectCommands": "No project commands have been created yet.",
+      "createFirst": "Create your first command",
+      "createFirstProject": "Create your first project command"
+    },
+    "form": {
+      "scope": "Scope",
+      "userScope": "User (Global)",
+      "projectScope": "Project (Local)",
+      "userScopeDescription": "Available in all projects",
+      "projectScopeDescription": "Available only in this project",
+      "examples": "Example Commands",
+      "examplesPlaceholder": "Choose an example template...",
+      "examplesDescription": "Select a template to pre-fill the command",
+      "name": "Command Name",
+      "namePlaceholder": "e.g., review, explain, fix",
+      "namespace": "Namespace (optional)",
+      "namespacePlaceholder": "e.g., git, test, deploy",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of what this command does",
+      "content": "Command Content*",
+      "contentPlaceholder": "Enter the prompt content. Use $ARGUMENTS for dynamic values.",
+      "contentDescription": "Use $ARGUMENTS for user input, @filename for files, and !`command` for bash commands",
+      "allowedTools": "Allowed Tools",
+      "allowedToolsDescription": "Select which tools Claude can use with this command",
+      "preview": "Preview",
+      "arguments": "arguments"
+    },
+    "dialog": {
+      "createTitle": "Create New Command",
+      "editTitle": "Edit Command",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "deleteDialog": {
+      "title": "Delete Command",
+      "confirmation": "Are you sure you want to delete this command?",
+      "warning": "This action cannot be undone. The command file will be permanently deleted.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    },
+    "errors": {
+      "loadFailed": "Failed to load commands",
+      "saveFailed": "Failed to save command",
+      "deleteFailed": "Failed to delete command"
+    }
+  },
+  "storage": {
+    "title": "Database Storage",
+    "description": "Manage application data and cache",
+    "buttons": {
+      "sql_query": "SQL Query",
+      "reset_db": "Reset DB",
+      "new_row": "New Row",
+      "cancel": "Cancel",
+      "update": "Update",
+      "insert": "Insert",
+      "delete": "Delete",
+      "reset_database": "Reset Database",
+      "close": "Close",
+      "execute": "Execute"
+    },
+    "table_selector": {
+      "placeholder": "Select a table",
+      "rows": "{{count}} rows",
+      "rows_plural": "{{count}} rows"
+    },
+    "search": {
+      "placeholder": "Search in table..."
+    },
+    "table": {
+      "primary_key": "PK",
+      "actions": "Actions"
+    },
+    "values": {
+      "null": "NULL",
+      "true": "true",
+      "false": "false"
+    },
+    "empty": {
+      "title": "No data found",
+      "no_search_results": "No rows found matching \"{{query}}\"",
+      "no_data": "This table is empty. Click 'New Row' to add data."
+    },
+    "pagination": {
+      "showing": "Showing {{start}} to {{end}} of {{total}} rows",
+      "previous": "Previous",
+      "next": "Next",
+      "page_info": "Page {{current}} of {{total}}"
+    },
+    "dialogs": {
+      "edit_row": {
+        "title": "Edit Row",
+        "description": "Update the values for this row in the {{table}} table."
+      },
+      "new_row": {
+        "title": "New Row",
+        "description": "Add a new row to the {{table}} table."
+      },
+      "delete_row": {
+        "title": "Delete Row",
+        "description": "Are you sure you want to delete this row? This action cannot be undone."
+      },
+      "reset_database": {
+        "title": "Reset Database",
+        "description": "This will delete all data and recreate the database with its default structure (empty tables for agents, agent_runs, and app_settings). The database will be restored to the same state as when you first installed the app. This action cannot be undone.",
+        "warning": "All your agents, runs, and settings will be permanently deleted!"
+      },
+      "sql_editor": {
+        "title": "SQL Query Editor",
+        "description": "Execute raw SQL queries on the database. Use with caution.",
+        "query_label": "SQL Query",
+        "query_placeholder": "SELECT * FROM agents LIMIT 10;",
+        "query_success": "Query executed successfully. {{count}} rows affected.",
+        "last_insert_id": "Last insert ID"
+      }
+    },
+    "form": {
+      "primary_key": "Primary Key",
+      "required": "Required",
+      "type": "Type",
+      "not_null": "NOT NULL",
+      "default": "Default"
+    },
+    "errors": {
+      "load_tables": "Failed to load tables",
+      "load_table_data": "Failed to load table data",
+      "update_row": "Failed to update row",
+      "delete_row": "Failed to delete row",
+      "insert_row": "Failed to insert row",
+      "execute_sql": "Failed to execute SQL",
+      "reset_database": "Failed to reset database"
+    },
+    "messages": {
+      "reset_success": "Database Reset Complete: The database has been restored to its default state with empty tables (agents, agent_runs, app_settings).",
+      "reset_failed": "Reset Failed: Failed to reset the database. Please try again."
+    }
+  },
+  "errors": {
+    "loadFailed": "Failed to load settings. Please ensure ~/.claude directory exists.",
+    "saveFailed": "Failed to save settings."
+  },
+  "toast": {
+    "saveSuccess": "Settings saved successfully!",
+    "saveFailed": "Failed to save settings"
+  }
+}

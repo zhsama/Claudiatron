@@ -1,0 +1,38 @@
+{
+  "windowTitle": "CLAUDIATRON.NFO",
+  "header": "CLAUDIATRON v0.1.0",
+  "subheader": "[ ASTERISK 战略项目 ]",
+  "asteriskTagline": "Asterisk 战略项目",
+  "sections": {
+    "credits": "━━━ 致谢 ━━━",
+    "dependencies": "━━━ 依赖项 ━━━",
+    "specialThanks": "━━━ 特别感谢 ━━━"
+  },
+  "credits": {
+    "poweredBy": "技术支持",
+    "claudeCode": "CLAUDE CODE",
+    "claudeCodeDesc": "终极编码助手",
+    "mcpProtocol": "MCP 协议",
+    "mcpProtocolDesc": "模型上下文协议"
+  },
+  "dependencies": {
+    "runtime": "运行时",
+    "uiFramework": "界面框架",
+    "styling": "样式",
+    "animations": "动画",
+    "buildTool": "构建工具",
+    "packageManager": "包管理器"
+  },
+  "thanks": {
+    "openSource": "致开源社区",
+    "betaTesters": "致所有测试人员",
+    "believers": "致所有相信这个项目的人"
+  },
+  "ascii": {
+    "welcome": "Welcome to Claude Code"
+  },
+  "footer": {
+    "sharing": "记住：分享就是关爱！",
+    "support": "支持开发者！"
+  }
+}

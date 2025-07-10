@@ -1,0 +1,53 @@
+{
+  "title": "时间线",
+  "loading": "正在加载时间线...",
+  "empty": "还没有检查点",
+  "noPrompt": "无提示",
+  "tokens": "标记",
+  "files": "文件",
+  "checkpointCount": "{{count}} 个检查点",
+  "checkpointCount_plural": "{{count}} 个检查点",
+  "experimental": {
+    "title": "实验性功能",
+    "description": "检查点功能可能会影响目录结构或造成数据丢失。请谨慎使用。"
+  },
+  "badges": {
+    "current": "当前"
+  },
+  "actions": {
+    "checkpoint": "检查点",
+    "cancel": "取消",
+    "createCheckpoint": "创建检查点",
+    "close": "关闭"
+  },
+  "tooltips": {
+    "restore": "恢复到此检查点",
+    "fork": "从此检查点分支",
+    "compare": "与其他检查点比较"
+  },
+  "dialogs": {
+    "create": {
+      "title": "创建检查点",
+      "description": "保存会话的当前状态，可添加可选描述。",
+      "descriptionLabel": "描述（可选）",
+      "placeholder": "例如：重大重构之前"
+    },
+    "comparison": {
+      "title": "检查点比较",
+      "description": "\"{{from}}\" 和 \"{{to}}\" 之间的变化"
+    }
+  },
+  "diff": {
+    "modifiedFiles": "修改的文件",
+    "addedFiles": "新增的文件",
+    "deletedFiles": "删除的文件"
+  },
+  "errors": {
+    "loadFailed": "无法加载时间线",
+    "createFailed": "无法创建检查点",
+    "restoreFailed": "无法恢复检查点",
+    "compareFailed": "无法比较检查点"
+  },
+  "confirmRestore": "恢复到检查点 \"{{checkpoint}}\"？当前状态将保存为新的检查点。",
+  "autoSaveBeforeRestore": "恢复前自动保存"
+}

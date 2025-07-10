@@ -1,0 +1,28 @@
+{
+  "projects": {
+    "loadFailed": "加载项目失败。请确保 ~/.claude 目录存在。",
+    "notFound": "未找到项目",
+    "accessDenied": "拒绝访问项目目录"
+  },
+  "sessions": {
+    "loadFailed": "加载此项目的会话失败。",
+    "createFailed": "创建新会话失败",
+    "deleteFailed": "删除会话失败"
+  },
+  "claude": {
+    "binaryNotFound": "未找到 Claude 二进制文件。请安装 Claude Code。",
+    "invalidPath": "无效的 Claude 二进制文件路径",
+    "executionFailed": "执行 Claude 命令失败",
+    "stillResponding": "Claude 仍在响应。如果您离开，Claude 将继续在后台运行。\n\n您可以从项目视图返回到此会话。\n\n您要继续吗？"
+  },
+  "network": {
+    "connectionFailed": "连接失败",
+    "timeout": "请求超时",
+    "serverError": "服务器错误"
+  },
+  "general": {
+    "unexpected": "发生意外错误",
+    "fileNotFound": "文件未找到",
+    "permissionDenied": "权限被拒绝"
+  }
+}

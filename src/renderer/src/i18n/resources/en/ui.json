@@ -1,0 +1,161 @@
+{
+  "button": {
+    "newClaudeSession": "New Claude Code session",
+    "backToHome": "← Back to Home",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "refresh": "Refresh",
+    "settings": "Settings",
+    "about": "About",
+    "help": "Help",
+    "fileABug": "File a bug"
+  },
+  "navigation": {
+    "ccAgents": {
+      "title": "CC Agents",
+      "description": "Manage your Claude Code agents"
+    },
+    "ccProjects": {
+      "title": "CC Projects",
+      "description": "Browse your Claude Code projects"
+    },
+    "usageDashboard": {
+      "title": "Usage Dashboard",
+      "description": "View your usage statistics"
+    },
+    "claudeMd": {
+      "title": "CLAUDE.md",
+      "description": "Edit project configuration"
+    },
+    "mcp": {
+      "title": "MCP",
+      "description": "Manage MCP servers"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure application settings"
+    }
+  },
+  "welcome": {
+    "title": {
+      "welcome": "Welcome to Claudia",
+      "tron": "tron"
+    },
+    "subtitle": "Your Claude Code interface"
+  },
+  "projects": {
+    "title": {
+      "main": "CC Projects"
+    },
+    "description": {
+      "browse": "Browse your Claude Code sessions"
+    },
+    "message": {
+      "noProjectsFound": "No projects found in ~/.claude/projects",
+      "loading": "Loading projects..."
+    }
+  },
+  "titleBar": {
+    "appName": "Claudiatron",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "close": "Close"
+  },
+  "toast": {
+    "success": {
+      "claudeBinaryPathSaved": "Claude binary path saved successfully"
+    }
+  },
+  "topbar": {
+    "status": {
+      "checking": "Checking...",
+      "claudeCode": "Claude Code",
+      "notFound": "Claude Code not found",
+      "selectInstallation": "Select Claude Installation",
+      "installClaudeCode": "Install Claude Code"
+    },
+    "buttons": {
+      "usageDashboard": "Usage Dashboard",
+      "claudeMd": "CLAUDE.md",
+      "mcp": "MCP",
+      "settings": "Settings",
+      "about": "About"
+    }
+  },
+  "chat": {
+    "composePrompt": "Compose your prompt",
+    "typePromptHere": "Type your prompt here...",
+    "askClaude": "Ask Claude anything...",
+    "dropImagesHere": "Drop images here...",
+    "model": "Model",
+    "stop": "Stop",
+    "models": {
+      "sonnet": {
+        "description": "Faster, efficient for most tasks"
+      },
+      "opus": {
+        "description": "More capable, better for complex tasks"
+      }
+    },
+    "thinking": {
+      "label": "Thinking",
+      "auto": {
+        "name": "Auto",
+        "description": "Let Claude decide"
+      },
+      "think": {
+        "name": "Think",
+        "description": "Basic reasoning"
+      },
+      "thinkHard": {
+        "name": "Think Hard",
+        "description": "Deeper analysis"
+      },
+      "thinkHarder": {
+        "name": "Think Harder",
+        "description": "Extensive reasoning"
+      },
+      "ultrathink": {
+        "name": "Ultrathink",
+        "description": "Maximum computation"
+      }
+    },
+    "shortcuts": {
+      "enterToSend": "Press Enter to send, Shift+Enter for new line",
+      "atMentionFiles": "@ to mention files",
+      "slashCommands": "/ for commands",
+      "dragDropImages": "Drag & drop or paste images"
+    }
+  },
+  "sessions": {
+    "count": "session",
+    "count_plural": "sessions",
+    "firstMessage": "First message",
+    "hasTodo": "Has todo"
+  },
+  "memories": {
+    "title": "CLAUDE.md Memories",
+    "noFiles": "No CLAUDE.md files found in this project",
+    "modified": "Modified"
+  },
+  "slashCommands": {
+    "title": "Slash Commands",
+    "searching": "Searching",
+    "tabs": {
+      "default": "Default",
+      "custom": "Custom"
+    },
+    "loading": "Loading commands...",
+    "noCommandsFound": "No commands found",
+    "noCustomCommands": "No custom commands available",
+    "createCommandsIn": "Create commands in",
+    "or": "or",
+    "navigation": "↑↓ Navigate • Enter Select • Esc Close"
+  },
+  "filePicker": {
+    "navigation": "↑↓ Navigate • Enter Select • → Enter Directory • ← Go Back • Esc Close"
+  }
+}

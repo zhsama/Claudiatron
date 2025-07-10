@@ -1,0 +1,9 @@
+/* Main Styles - Modular Architecture */
+
+/* Base Tailwind v4 styles */
+@import './styles/base.css';
+
+/* Component-specific styles */
+@import './styles/components/scrollbar.css';
+@import './styles/components/markdown.css';
+@import './styles/components/animations.css';
