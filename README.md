@@ -18,7 +18,7 @@
   </p>
   
   <p>
-    <a href="README.zh.md">中文文档</a> | <strong>English</strong>
+    <a href="README.zh.md">中文</a> | <strong>English</strong>
   </p>
 </div>
 
@@ -194,8 +194,8 @@ Release executables will be published soon.
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository-url>
-   cd claudiatron
+   git clone https://github.com/Haleclipse/Claudiatron.git
+   cd Claudiatron
    ```
 
 2. **Install Dependencies**
@@ -337,8 +337,8 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
     <strong>Built with Electron for modern desktop experiences</strong>
   </p>
   <p>
-    <a href="https://github.com/your-username/claudiatron/issues">Report Bug</a>
+    <a href="https://github.com/Haleclipse/Claudiatron/issues">Report Bug</a>
     ·
-    <a href="https://github.com/your-username/claudiatron/issues">Request Feature</a>
+    <a href="https://github.com/Haleclipse/Claudiatron/issues">Request Feature</a>
   </p>
 </div>

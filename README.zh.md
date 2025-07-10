@@ -194,8 +194,8 @@ CC Agents → 创建代理 → 配置设置 → 执行任务
 
 1. **克隆仓库**
    ```bash
-   git clone <repository-url>
-   cd claudiatron
+   git clone https://github.com/Haleclipse/Claudiatron.git
+   cd Claudiatron
    ```
 
 2. **安装依赖**
@@ -337,8 +337,8 @@ Claudiatron 优先考虑您的隐私和安全：
     <strong>基于 Electron 构建的现代化桌面应用</strong>
   </p>
   <p>
-    <a href="https://github.com/your-username/claudiatron/issues">报告问题</a>
+    <a href="https://github.com/Haleclipse/Claudiatron/issues">报告问题</a>
     ·
-    <a href="https://github.com/your-username/claudiatron/issues">功能请求</a>
+    <a href="https://github.com/Haleclipse/Claudiatron/issues">功能请求</a>
   </p>
 </div>
