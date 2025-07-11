@@ -1,5 +1,6 @@
 appId: org.haleclipse.claudiatron
 productName: Claudiatron
+copyright: Copyright © 2024 haleclipse
 directories:
   buildResources: build
 files:
@@ -17,13 +18,28 @@ asarUnpack:
 win:
   executableName: Claudiatron
   icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  createStartMenuShortcut: true
+  menuCategory: "Developer Tools"
+  license: LICENSE
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  displayLanguageSelector: true
+  installerLanguages: [en_US, zh_CN]
+portable:
+  artifactName: ${name}-${version}-portable.${ext}
 mac:
   icon: build/icon.icns
+  category: public.app-category.developer-tools
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
@@ -32,20 +48,42 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
   identity: null
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
 dmg:
   artifactName: ${name}-${version}.${ext}
+  title: ${productName} ${version}
+  window:
+    width: 540
+    height: 380
 linux:
   icon: build/icon.png
   target:
-    - AppImage
-    - deb
-  maintainer: haleclpse.org
-  category: Utility
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+    - target: rpm
+      arch: [x64]
+  maintainer: haleclipse <haleclipse@gmail.com>
+  vendor: haleclipse
+  category: Development
+  synopsis: Claude Code GUI - 一个基于 Electron 的 Claude Code 图形界面工具
+  description: |
+    Claudiatron 是一个基于 Electron + React + TypeScript 的桌面应用，
+    作为 Claude Code 的 GUI 工具，提供完整的 Claude Code 集成功能。
 appImage:
   artifactName: ${name}-${version}.${ext}
+  category: Development
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: haleclipse
+  repo: claudiatron
+  private: false
+  releaseType: release
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

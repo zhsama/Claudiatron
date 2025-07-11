@@ -1,10 +1,25 @@
 {
   "name": "claudiatron",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "Claude Code GUI - 一个基于 Electron 的 Claude Code 图形界面工具",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "haleclipse <haleclipse@gmail.com>",
+  "homepage": "https://github.com/haleclipse/claudiatron",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haleclipse/claudiatron.git"
+  },
+  "license": "AGPL-3.0",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "assistant",
+    "gui",
+    "electron",
+    "typescript",
+    "react"
+  ],
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
