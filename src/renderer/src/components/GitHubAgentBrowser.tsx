@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { api, type GitHubAgentFile, type AgentExport, type Agent } from '@/lib/api'
 import { type AgentIconName } from './CCAgents'
 import { ICON_MAP } from './IconPicker'
-import { open } from '@/lib/api-simple'
+import { open } from '@/lib/api'
 
 interface GitHubAgentBrowserProps {
   isOpen: boolean

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
   Play,
@@ -28,8 +29,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { api, type Agent } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { open } from '@/lib/api-simple'
-import { listen, type UnlistenFn } from '@/lib/api-simple'
+import { open } from '@/lib/api'
+import { listen, type UnlistenFn } from '@/lib/api'
 import { StreamMessage } from './StreamMessage'
 import { ExecutionControlBar } from './ExecutionControlBar'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -76,6 +77,7 @@ export interface ClaudeStreamMessage {
  * <AgentExecution agent={agent} onBack={() => setView('list')} />
  */
 export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, className }) => {
+  const { t } = useTranslation('ui')
   const [projectPath, setProjectPath] = useState('')
   const [task, setTask] = useState(agent.default_task || '')
   const [model, setModel] = useState(agent.model || 'sonnet')
@@ -288,8 +290,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
   const handleSelectPath = async () => {
     try {
       const selected = await open({
-        directory: true,
-        multiple: false,
+        properties: ['openDirectory'],
         title: 'Select Project Directory'
       })
 
@@ -327,7 +328,12 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
       setRunId(executionRunId)
 
       // Set up event listeners with run ID isolation
+      console.log('[AgentExecution] Setting up event listener for runId:', executionRunId)
       const outputUnlisten = await listen<string>(`agent-output:${executionRunId}`, (event) => {
+        console.log(
+          '[AgentExecution] Received agent output event:',
+          event.payload?.length ? `data length: ${event.payload.length}` : event.payload
+        )
         try {
           // Store raw JSONL
           setRawJsonlOutput((prev) => [...prev, event.payload])
@@ -557,7 +563,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="p-6"
+              className="p-2"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -574,7 +580,9 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                       {renderIcon()}
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold">Execute: {agent.name}</h1>
+                      <h1 className="text-xl font-bold">
+                        {t('agents.execution.executeAgent', { name: agent.name })}
+                      </h1>
                       <p className="text-sm text-muted-foreground">
                         {model === 'opus' ? 'Claude 4 Opus' : 'Claude 4 Sonnet'}
                       </p>
@@ -589,7 +597,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                     disabled={messages.length === 0}
                   >
                     <Maximize2 className="h-4 w-4 mr-2" />
-                    Fullscreen
+                    {t('agents.execution.fullscreen')}
                   </Button>
                 </div>
               </div>
@@ -614,12 +622,12 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
 
             {/* Project Path */}
             <div className="space-y-2">
-              <Label>Project Path</Label>
+              <Label>{t('agents.execution.projectPath')}</Label>
               <div className="flex gap-2">
                 <Input
                   value={projectPath}
                   onChange={(e) => setProjectPath(e.target.value)}
-                  placeholder="Select or enter project path"
+                  placeholder={t('agents.execution.selectProjectPath')}
                   disabled={isRunning}
                   className="flex-1"
                 />
@@ -645,7 +653,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
 
             {/* Model Selection */}
             <div className="space-y-2">
-              <Label>Model</Label>
+              <Label>{t('chat.model')}</Label>
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -707,7 +715,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
 
             {/* Task Input */}
             <div className="space-y-2">
-              <Label>Task</Label>
+              <Label>{t('agents.execution.task')}</Label>
               <div className="flex gap-2">
                 <Input
                   value={task}
@@ -734,7 +742,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                   ) : (
                     <>
                       <Play className="mr-2 h-4 w-4" />
-                      Execute
+                      {t('agents.buttons.execute')}
                     </>
                   )}
                 </Button>
@@ -765,9 +773,11 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                 {messages.length === 0 && !isRunning && (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <Terminal className="h-16 w-16 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Ready to Execute</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      {t('agents.execution.readyToExecute')}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      Select a project path and enter a task to run the agent
+                      {t('agents.execution.selectProjectAndTask')}
                     </p>
                   </div>
                 )}
@@ -827,7 +837,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
       {isFullscreenModalOpen && (
         <div className="fixed inset-0 z-50 bg-background flex flex-col">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center justify-between p-4 border-b border-border app-region-no-drag">
             <div className="flex items-center gap-2">
               {renderIcon()}
               <h2 className="text-lg font-semibold">{agent.name} - Output</h2>
@@ -898,9 +908,11 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
               {messages.length === 0 && !isRunning && (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <Terminal className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Ready to Execute</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    {t('agents.execution.readyToExecute')}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Select a project path and enter a task to run the agent
+                    {t('agents.execution.selectProjectAndTask')}
                   </p>
                 </div>
               )}
@@ -949,7 +961,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
 
       {/* Hooks Configuration Dialog */}
       <Dialog open={isHooksDialogOpen} onOpenChange={setIsHooksDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="!w-[60vw] !max-w-none max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Configure Hooks</DialogTitle>
             <DialogDescription>

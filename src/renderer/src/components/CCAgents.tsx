@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Edit,
@@ -31,8 +32,8 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { api, type Agent, type AgentRunWithMetrics } from '@/lib/api'
-import { save, open } from '@/lib/api-simple'
-import { invoke } from '@/lib/api-simple'
+import { save, open } from '@/lib/api'
+import { invoke } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { Toast, ToastContainer } from '@/components/ui/toast'
 import { CreateAgent } from './CreateAgent'
@@ -64,6 +65,7 @@ export type AgentIconName = keyof typeof AGENT_ICONS
  * <CCAgents onBack={() => setView('home')} />
  */
 export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
+  const { t } = useTranslation('ui')
   const [agents, setAgents] = useState<Agent[]>([])
   const [runs, setRuns] = useState<AgentRunWithMetrics[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,8 +96,8 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
       setAgents(agentsList)
     } catch (err) {
       console.error('Failed to load agents:', err)
-      setError('Failed to load agents')
-      setToast({ message: 'Failed to load agents', type: 'error' })
+      setError(t('agents.toast.loadFailed'))
+      setToast({ message: t('agents.toast.loadFailed'), type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -132,12 +134,12 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
     try {
       setIsDeleting(true)
       await api.deleteAgent(agentToDelete.id)
-      setToast({ message: 'Agent deleted successfully', type: 'success' })
+      setToast({ message: t('agents.toast.deleted'), type: 'success' })
       await loadAgents()
       await loadRuns() // Reload runs as they might be affected
     } catch (err) {
       console.error('Failed to delete agent:', err)
-      setToast({ message: 'Failed to delete agent', type: 'error' })
+      setToast({ message: t('agents.toast.deleteFailed'), type: 'error' })
     } finally {
       setIsDeleting(false)
       setShowDeleteDialog(false)
@@ -166,13 +168,13 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
   const handleAgentCreated = async () => {
     setView('list')
     await loadAgents()
-    setToast({ message: 'Agent created successfully', type: 'success' })
+    setToast({ message: t('agents.toast.created'), type: 'success' })
   }
 
   const handleAgentUpdated = async () => {
     setView('list')
     await loadAgents()
-    setToast({ message: 'Agent updated successfully', type: 'success' })
+    setToast({ message: t('agents.toast.updated'), type: 'success' })
   }
 
   // const handleRunClick = (run: AgentRunWithMetrics) => {
@@ -211,10 +213,10 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
         filePath
       })
 
-      setToast({ message: `Agent "${agent.name}" exported successfully`, type: 'success' })
+      setToast({ message: t('agents.toast.exported', { name: agent.name }), type: 'success' })
     } catch (err) {
       console.error('Failed to export agent:', err)
-      setToast({ message: 'Failed to export agent', type: 'error' })
+      setToast({ message: t('agents.toast.exportFailed'), type: 'error' })
     }
   }
 
@@ -237,13 +239,15 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
       }
 
       // Import the agent from the selected file
-      await api.importAgentFromFile(filePath as string)
+      // Handle both string and array return types from open()
+      const filePathString = Array.isArray(filePath) ? filePath[0] : filePath
+      await api.importAgentFromFile(filePathString)
 
-      setToast({ message: 'Agent imported successfully', type: 'success' })
+      setToast({ message: t('agents.toast.imported'), type: 'success' })
       await loadAgents()
     } catch (err) {
       console.error('Failed to import agent:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to import agent'
+      const errorMessage = err instanceof Error ? err.message : t('agents.toast.importFailed')
       setToast({ message: errorMessage, type: 'error' })
     }
   }
@@ -302,8 +306,8 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">CC Agents</h1>
-                <p className="text-sm text-muted-foreground">Manage your Claude Code agents</p>
+                <h1 className="text-2xl font-bold">{t('agents.title')}</h1>
+                <p className="text-sm text-muted-foreground">{t('agents.description')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -311,18 +315,18 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                 <DropdownMenuTrigger asChild>
                   <Button size="default" variant="outline" className="flex items-center gap-2">
                     <Download className="h-4 w-4" />
-                    Import
+                    {t('agents.buttons.import')}
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleImportAgent}>
                     <FileJson className="h-4 w-4 mr-2" />
-                    From File
+                    {t('agents.import.fromFile')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowGitHubBrowser(true)}>
                     <Globe className="h-4 w-4 mr-2" />
-                    From GitHub
+                    {t('agents.import.fromGitHub')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -332,7 +336,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Create CC Agent
+                {t('agents.buttons.create')}
               </Button>
             </div>
           </div>
@@ -369,13 +373,13 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                 ) : agents.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
                     <Bot className="h-16 w-16 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No agents yet</h3>
+                    <h3 className="text-lg font-medium mb-2">{t('agents.empty.title')}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Create your first CC Agent to get started
+                      {t('agents.empty.description')}
                     </p>
                     <Button onClick={() => setView('create')} size="default">
                       <Plus className="h-4 w-4 mr-2" />
-                      Create CC Agent
+                      {t('agents.buttons.create')}
                     </Button>
                   </div>
                 ) : (
@@ -390,14 +394,16 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                             exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ duration: 0.2, delay: index * 0.05 }}
                           >
-                            <Card className="h-full hover:shadow-lg transition-shadow">
+                            <Card className="h-full hover:shadow-lg transition-shadow !py-0">
                               <CardContent className="p-6 flex flex-col items-center text-center">
                                 <div className="mb-4 p-4 rounded-full bg-primary/10 text-primary">
                                   {renderIcon(agent.icon)}
                                 </div>
                                 <h3 className="text-lg font-semibold mb-2">{agent.name}</h3>
                                 <p className="text-xs text-muted-foreground">
-                                  Created: {new Date(agent.created_at).toLocaleDateString()}
+                                  {t('agents.card.created', {
+                                    date: new Date(agent.created_at).toLocaleDateString()
+                                  })}
                                 </p>
                               </CardContent>
                               <CardFooter className="p-4 pt-0 flex justify-center gap-1 flex-wrap">
@@ -406,40 +412,40 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                                   variant="ghost"
                                   onClick={() => handleExecuteAgent(agent)}
                                   className="flex items-center gap-1"
-                                  title="Execute agent"
+                                  title={t('agents.tooltips.execute')}
                                 >
                                   <Play className="h-3 w-3" />
-                                  Execute
+                                  {t('agents.buttons.execute')}
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleEditAgent(agent)}
                                   className="flex items-center gap-1"
-                                  title="Edit agent"
+                                  title={t('agents.tooltips.edit')}
                                 >
                                   <Edit className="h-3 w-3" />
-                                  Edit
+                                  {t('agents.buttons.edit')}
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleExportAgent(agent)}
                                   className="flex items-center gap-1"
-                                  title="Export agent to .claudia.json"
+                                  title={t('agents.tooltips.export')}
                                 >
                                   <Upload className="h-3 w-3" />
-                                  Export
+                                  {t('agents.buttons.export')}
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleDeleteAgent(agent)}
                                   className="flex items-center gap-1 text-destructive hover:text-destructive"
-                                  title="Delete agent"
+                                  title={t('agents.tooltips.delete')}
                                 >
                                   <Trash2 className="h-3 w-3" />
-                                  Delete
+                                  {t('agents.buttons.delete')}
                                 </Button>
                               </CardFooter>
                             </Card>
@@ -457,10 +463,10 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                           disabled={currentPage === 1}
                         >
-                          Previous
+                          {t('agents.buttons.previous')}
                         </Button>
                         <span className="flex items-center px-3 text-sm">
-                          Page {currentPage} of {totalPages}
+                          {t('agents.pagination.page', { current: currentPage, total: totalPages })}
                         </span>
                         <Button
                           size="sm"
@@ -468,7 +474,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                           disabled={currentPage === totalPages}
                         >
-                          Next
+                          {t('agents.buttons.next')}
                         </Button>
                       </div>
                     )}
@@ -481,7 +487,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                 <div className="overflow-hidden">
                   <div className="flex items-center gap-2 mb-4">
                     <History className="h-5 w-5 text-muted-foreground" />
-                    <h2 className="text-lg font-semibold">Recent Executions</h2>
+                    <h2 className="text-lg font-semibold">{t('agents.execution.title')}</h2>
                   </div>
                   {runsLoading ? (
                     <div className="flex items-center justify-center h-32">
@@ -511,7 +517,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
         onImportSuccess={async () => {
           setShowGitHubBrowser(false)
           await loadAgents()
-          setToast({ message: 'Agent imported successfully from GitHub', type: 'success' })
+          setToast({ message: t('agents.toast.importedFromGitHub'), type: 'success' })
         }}
       />
 
@@ -521,11 +527,10 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-destructive" />
-              Delete Agent
+              {t('agents.dialog.delete.title')}
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the agent "{agentToDelete?.name}"? This action cannot
-              be undone and will permanently remove the agent and all its associated data.
+              {t('agents.dialog.delete.description', { name: agentToDelete?.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
@@ -535,7 +540,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
               disabled={isDeleting}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t('agents.buttons.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -546,12 +551,12 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
               {isDeleting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Deleting...
+                  {t('agents.dialog.deleting')}
                 </>
               ) : (
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Agent
+                  {t('agents.buttons.delete')}
                 </>
               )}
             </Button>

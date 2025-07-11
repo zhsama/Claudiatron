@@ -58,7 +58,7 @@ import * as Diff from 'diff'
 import { Card, CardContent } from '@/components/ui/card'
 import { detectLinks, makeLinksClickable } from '@/lib/linkDetector'
 import ReactMarkdown from 'react-markdown'
-import { open } from '@/lib/api-simple'
+import { open } from '@/lib/api'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1901,7 +1901,7 @@ export const SystemInitializedWidget: React.FC<{
   )
 
   return (
-    <Card className="border-blue-500/20 bg-blue-500/5">
+    <Card className="border-blue-500/20 bg-blue-500/5 !py-0">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Settings className="h-5 w-5 text-blue-500 mt-0.5" />

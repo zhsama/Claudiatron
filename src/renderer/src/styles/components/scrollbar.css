@@ -136,3 +136,44 @@ code::-webkit-scrollbar-thumb:hover,
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* Extra thin scrollbar for dropdown components */
+.custom-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Dark mode for thin scrollbar */
+.dark .custom-scrollbar-thin {
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}

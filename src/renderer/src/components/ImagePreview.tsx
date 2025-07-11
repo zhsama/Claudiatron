@@ -3,7 +3,7 @@ import { X, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { convertFileSrc } from '@/lib/api-simple'
+import { convertFileSrc } from '@/lib/api'
 
 interface ImagePreviewProps {
   /**

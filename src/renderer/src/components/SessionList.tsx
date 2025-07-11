@@ -98,7 +98,8 @@ export const SessionList: React.FC<SessionListProps> = ({
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-medium truncate">{projectPath}</h2>
           <p className="text-xs text-muted-foreground">
-            {sessions.length} {sessions.length === 1 ? t('sessions.count') : t('sessions.count_plural')}
+            {sessions.length}{' '}
+            {sessions.length === 1 ? t('sessions.count') : t('sessions.count_plural')}
           </p>
         </div>
       </motion.div>

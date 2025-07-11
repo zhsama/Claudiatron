@@ -20,8 +20,8 @@ import { Label } from '@/components/ui/label'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { api, type Session } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { open } from '@/lib/api-simple'
-import { listen, type UnlistenFn } from '@/lib/api-simple'
+import { open } from '@/lib/api'
+import { listen, type UnlistenFn } from '@/lib/api'
 import { StreamMessage } from './StreamMessage'
 import { FloatingPromptInput, type FloatingPromptInputRef } from './FloatingPromptInput'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -426,8 +426,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const handleSelectPath = async () => {
     try {
       const selected = await open({
-        directory: true,
-        multiple: false,
+        properties: ['openDirectory'],
         title: 'Select Project Directory'
       })
 

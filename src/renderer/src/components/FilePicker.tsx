@@ -482,9 +482,7 @@ export const FilePicker: React.FC<FilePickerProps> = ({
 
       {/* Footer */}
       <div className="border-t border-border p-2">
-        <p className="text-xs text-muted-foreground text-center">
-          {t('filePicker.navigation')}
-        </p>
+        <p className="text-xs text-muted-foreground text-center">{t('filePicker.navigation')}</p>
       </div>
     </motion.div>
   )

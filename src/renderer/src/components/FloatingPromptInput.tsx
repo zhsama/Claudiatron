@@ -21,7 +21,7 @@ import { FilePicker } from './FilePicker'
 import { SlashCommandPicker } from './SlashCommandPicker'
 import { ImagePreview } from './ImagePreview'
 import { type FileEntry, type SlashCommand } from '@/lib/api'
-import { getCurrentWebviewWindow } from '@/lib/api-simple'
+import { getCurrentWebviewWindow } from '@/lib/api'
 
 interface FloatingPromptInputProps {
   /**
@@ -913,7 +913,9 @@ const FloatingPromptInputInner = (
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{t('chat.thinking.label')}:</span>
+                    <span className="text-xs text-muted-foreground">
+                      {t('chat.thinking.label')}:
+                    </span>
                     <Popover open={thinkingModePickerOpen} onOpenChange={setThinkingModePickerOpen}>
                       <TooltipProvider>
                         <Tooltip>
@@ -1079,7 +1081,8 @@ const FloatingPromptInputInner = (
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="font-medium">
-                        {THINKING_MODES.find((m) => m.id === selectedThinkingMode)?.name || t('chat.thinking.auto.name')}
+                        {THINKING_MODES.find((m) => m.id === selectedThinkingMode)?.name ||
+                          t('chat.thinking.auto.name')}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {THINKING_MODES.find((m) => m.id === selectedThinkingMode)?.description}

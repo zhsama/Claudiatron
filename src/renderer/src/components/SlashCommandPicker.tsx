@@ -80,7 +80,7 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
   className
 }) => {
   const { t } = useTranslation('ui')
-  
+
   const [commands, setCommands] = useState<SlashCommand[]>([])
   const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -272,7 +272,9 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
             <Command className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">{t('slashCommands.title')}</span>
             {searchQuery && (
-              <span className="text-xs text-muted-foreground">{t('slashCommands.searching')}: "{searchQuery}"</span>
+              <span className="text-xs text-muted-foreground">
+                {t('slashCommands.searching')}: "{searchQuery}"
+              </span>
             )}
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
@@ -375,11 +377,14 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
                   <div className="flex flex-col items-center justify-center h-full">
                     <Search className="h-8 w-8 text-muted-foreground mb-2" />
                     <span className="text-sm text-muted-foreground">
-                      {searchQuery ? t('slashCommands.noCommandsFound') : t('slashCommands.noCustomCommands')}
+                      {searchQuery
+                        ? t('slashCommands.noCommandsFound')
+                        : t('slashCommands.noCustomCommands')}
                     </span>
                     {!searchQuery && (
                       <p className="text-xs text-muted-foreground mt-2 text-center px-4">
-                        {t('slashCommands.createCommandsIn')} <code className="px-1">.claude/commands/</code> {t('slashCommands.or')}{' '}
+                        {t('slashCommands.createCommandsIn')}{' '}
+                        <code className="px-1">.claude/commands/</code> {t('slashCommands.or')}{' '}
                         <code className="px-1">~/.claude/commands/</code>
                       </p>
                     )}
@@ -542,9 +547,7 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
 
       {/* Footer */}
       <div className="border-t border-border p-2">
-        <p className="text-xs text-muted-foreground text-center">
-          {t('slashCommands.navigation')}
-        </p>
+        <p className="text-xs text-muted-foreground text-center">{t('slashCommands.navigation')}</p>
       </div>
     </motion.div>
   )

@@ -150,11 +150,6 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
   const [commandToDelete, setCommandToDelete] = useState<SlashCommand | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  // Load commands on mount
-  useEffect(() => {
-    loadCommands()
-  }, [projectPath])
-
   const loadCommands = async () => {
     try {
       setLoading(true)
@@ -168,6 +163,11 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
       setLoading(false)
     }
   }
+
+  // Load commands on mount
+  useEffect(() => {
+    loadCommands()
+  }, [projectPath])
 
   const handleCreateNew = () => {
     setEditingCommand(null)

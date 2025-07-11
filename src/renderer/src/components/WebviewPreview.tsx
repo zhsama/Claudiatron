@@ -17,8 +17,8 @@ import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 // TODO: These imports will be used when implementing actual Tauri webview
-// import { getCurrentWebviewWindow } from "@/lib/api-simple";
-// import { WebviewWindow } from "@/lib/api-simple";
+// import { getCurrentWebviewWindow } from "@/lib/api";
+// import { WebviewWindow } from "@/lib/api";
 
 interface WebviewPreviewProps {
   /**

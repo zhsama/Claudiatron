@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Volume2, VolumeX, Github } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { openUrl } from '@/lib/api-simple'
+import { openUrl } from '@/lib/api'
 import asteriskLogo from '@/assets/nfo/asterisk-logo.png'
 import keygennMusic from '@/assets/nfo/claudia-nfo.ogg'
 

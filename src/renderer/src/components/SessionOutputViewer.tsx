@@ -9,7 +9,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { api } from '@/lib/api'
 import { useOutputCache } from '@/lib/outputCache'
 import type { AgentRun } from '@/lib/api'
-import { listen, type UnlistenFn } from '@/lib/api-simple'
+import { listen, type UnlistenFn } from '@/lib/api'
 import { StreamMessage } from './StreamMessage'
 import { ErrorBoundary } from './ErrorBoundary'
 

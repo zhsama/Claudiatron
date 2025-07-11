@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Play, Clock, Hash, Bot } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -37,6 +38,7 @@ const ITEMS_PER_PAGE = 5
  * />
  */
 export const AgentRunsList: React.FC<AgentRunsListProps> = ({ runs, onRunClick, className }) => {
+  const { t } = useTranslation('ui')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedRun, setSelectedRun] = useState<AgentRunWithMetrics | null>(null)
 
@@ -87,7 +89,7 @@ export const AgentRunsList: React.FC<AgentRunsListProps> = ({ runs, onRunClick, 
     return (
       <div className={cn('text-center py-8 text-muted-foreground', className)}>
         <Play className="h-8 w-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">No execution history yet</p>
+        <p className="text-sm">{t('agents.execution.noHistory')}</p>
       </div>
     )
   }
@@ -110,7 +112,7 @@ export const AgentRunsList: React.FC<AgentRunsListProps> = ({ runs, onRunClick, 
             >
               <Card
                 className={cn(
-                  'cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99]',
+                  'cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99] !py-0',
                   run.status === 'running' && 'border-green-500/50'
                 )}
                 onClick={() => handleRunClick(run)}
