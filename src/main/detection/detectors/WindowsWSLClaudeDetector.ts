@@ -104,7 +104,10 @@ export class WindowsWSLClaudeDetector extends PlatformClaudeDetector {
         defaultDistro: distributions.find((d) => d.isDefault)?.name
       }
     } catch (error) {
-      console.warn('Failed to detect WSL environment:', error instanceof Error ? error.message : String(error))
+      console.warn(
+        'Failed to detect WSL environment:',
+        error instanceof Error ? error.message : String(error)
+      )
       return {
         available: false,
         version: 'unknown',
@@ -197,7 +200,10 @@ export class WindowsWSLClaudeDetector extends PlatformClaudeDetector {
           }
         }
       } catch (error) {
-        console.warn(`WSL command failed: ${cmd}`, error instanceof Error ? error.message : String(error))
+        console.warn(
+          `WSL command failed: ${cmd}`,
+          error instanceof Error ? error.message : String(error)
+        )
         continue
       }
     }
@@ -218,7 +224,10 @@ export class WindowsWSLClaudeDetector extends PlatformClaudeDetector {
 
       return result.exitCode === 0 && result.stdout.includes('claude')
     } catch (error) {
-      console.warn(`Failed to verify Claude in WSL ${distroName}:`, error instanceof Error ? error.message : String(error))
+      console.warn(
+        `Failed to verify Claude in WSL ${distroName}:`,
+        error instanceof Error ? error.message : String(error)
+      )
       return false
     }
   }
@@ -238,7 +247,10 @@ export class WindowsWSLClaudeDetector extends PlatformClaudeDetector {
         return this.parseVersion(result.stdout)
       }
     } catch (error) {
-      console.warn(`Failed to get Claude version in WSL ${distroName}:`, error instanceof Error ? error.message : String(error))
+      console.warn(
+        `Failed to get Claude version in WSL ${distroName}:`,
+        error instanceof Error ? error.message : String(error)
+      )
     }
 
     return null
