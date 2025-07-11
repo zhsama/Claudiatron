@@ -469,7 +469,20 @@ export function setupClaudeHandlers() {
   // File Dialogs
   ipcMain.handle('show-open-dialog', async (_, options) => {
     const result = await dialog.showOpenDialog(options)
-    return result.canceled ? null : result.filePaths
+    if (result.canceled) {
+      return null
+    }
+
+    // For directory selection (which is typical for project paths), return single path
+    // To match Tauri's behavior where open() returns a string for single selection
+    if (options.properties && options.properties.includes('openDirectory')) {
+      return result.filePaths[0] || null
+    }
+
+    // For file selection, return array if multiple, string if single
+    return options.properties && options.properties.includes('multiSelections')
+      ? result.filePaths
+      : result.filePaths[0] || null
   })
 
   ipcMain.handle('show-save-dialog', async (_, options) => {

@@ -2,6 +2,7 @@ import { execa, type ResultPromise, type Result } from 'execa'
 import treeKill from 'tree-kill'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
+import { resolve as resolvePath } from 'path'
 
 /**
  * Type of process being tracked
@@ -76,9 +77,21 @@ export class ProcessManager extends EventEmitter {
     model: string,
     command: string,
     args: string[] = [],
-    options: any = {}
+    options: Record<string, any> = {}
   ): Promise<number> {
     const runId = this.generateId()
+
+    console.log('[ProcessManager] Starting agent process:', {
+      runId,
+      agentId,
+      agentName,
+      projectPath,
+      command,
+      args: args.join(' '),
+      argsLength: args.length,
+      task: task.substring(0, 100) + (task.length > 100 ? '...' : ''),
+      model
+    })
 
     // Create process info
     const processInfo: ProcessInfo = {
@@ -94,18 +107,106 @@ export class ProcessManager extends EventEmitter {
     }
 
     // Start the process with proper options
+    // First spread options, then override with required values to avoid conflicts
     const processOptions = {
+      ...options,
       cwd: projectPath,
       stdout: 'pipe' as const,
-      stderr: 'pipe' as const,
-      ...options
+      stderr: 'pipe' as const
     }
 
-    const childProcess = execa(command, args, processOptions)
+    // Validate and normalize cwd path
+    if (typeof processOptions.cwd !== 'string') {
+      throw new Error(`Invalid cwd option: expected string, got ${typeof processOptions.cwd}`)
+    }
+
+    // Ensure the cwd path is properly normalized and doesn't have trailing issues
+    processOptions.cwd = processOptions.cwd.trim()
+
+    // Check if path is empty after trimming
+    if (!processOptions.cwd) {
+      throw new Error('Invalid cwd option: path cannot be empty')
+    }
+
+    // Resolve the path to ensure it's absolute and normalized
+    try {
+      processOptions.cwd = resolvePath(processOptions.cwd)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new Error(`Invalid cwd path: ${processOptions.cwd} - ${errorMessage}`)
+    }
+
+    console.log('[ProcessManager] Final execution details:', {
+      command,
+      args: args,
+      argsJoined: args.join(' '),
+      cwd: processOptions.cwd,
+      runId
+    })
+
+    // Test command validity and output full command for manual testing
+    if (args.length > 0) {
+      console.log('[ProcessManager] Command will be executed as:', command, args)
+      console.log('[ProcessManager] First few args:', args.slice(0, 3))
+
+      // Build the complete command string for manual testing
+      const quotedArgs = args.map((arg) => {
+        // Quote arguments that contain spaces or special characters
+        if (arg.includes(' ') || arg.includes('\n') || arg.includes('"') || arg.includes("'")) {
+          return `"${arg.replace(/"/g, '\\"')}"`
+        }
+        return arg
+      })
+      const fullCommand = `${command} ${quotedArgs.join(' ')}`
+
+      console.log('\n=== MANUAL TEST COMMAND ===')
+      console.log('Copy and run this command in your terminal to test manually:')
+      console.log(`cd "${processOptions.cwd}"`)
+      console.log(fullCommand)
+      console.log('=== END MANUAL TEST COMMAND ===\n')
+    }
+
+    console.log('[ProcessManager] Spawning process with execa...')
+
+    // Add a timeout to the process to prevent it from hanging indefinitely
+    const processOptionsWithTimeout = {
+      ...processOptions,
+      timeout: 300000, // 5 minutes timeout
+      env: {
+        ...process.env, // Inherit all environment variables
+        // Ensure key environment variables are set
+        NODE_ENV: process.env.NODE_ENV || 'development',
+        TERM: process.env.TERM || 'xterm-256color'
+      }
+    }
+
+    console.log(
+      '[ProcessManager] Using direct execution with env PATH:',
+      process.env.PATH?.substring(0, 200)
+    )
+
+    const childProcess = execa(command, args, processOptionsWithTimeout)
+
+    // Close stdin to prevent Claude from waiting for input
+    if (childProcess.stdin) {
+      childProcess.stdin.end()
+      console.log('[ProcessManager] Closed stdin for runId:', runId)
+    }
 
     // Update PID once available
     if (childProcess.pid) {
       processInfo.pid = childProcess.pid
+      console.log(
+        '[ProcessManager] Process spawned successfully with PID:',
+        childProcess.pid,
+        'for runId:',
+        runId
+      )
+    } else {
+      console.log(
+        '[ProcessManager] Warning: Process spawned but no PID available for runId:',
+        runId
+      )
     }
 
     // Create process handle
@@ -179,26 +280,116 @@ export class ProcessManager extends EventEmitter {
    * Set up output streaming for a process
    */
   private setupOutputStreaming(runId: number, childProcess: ResultPromise<any>): void {
+    console.log('[ProcessManager] Setting up output streaming for runId:', runId)
     const handle = this.processes.get(runId)
-    if (!handle) return
+    if (!handle) {
+      console.error('[ProcessManager] No handle found for runId:', runId)
+      return
+    }
 
     // Handle stdout
     if (childProcess.stdout) {
+      console.log('[ProcessManager] Setting up stdout listener for runId:', runId)
       childProcess.stdout.on('data', (data: Buffer) => {
         const output = data.toString()
+        console.log(
+          '[ProcessManager] Received stdout data for runId:',
+          runId,
+          'length:',
+          output.length
+        )
         this.appendLiveOutput(runId, output)
-        this.notifyUI('process-output', { runId, output, type: 'stdout' })
+        this.sendAgentEvent(runId, 'agent-output', output)
       })
+
+      childProcess.stdout.on('end', () => {
+        console.log('[ProcessManager] stdout stream ended for runId:', runId)
+      })
+
+      childProcess.stdout.on('error', (error) => {
+        console.error('[ProcessManager] stdout error for runId:', runId, error)
+      })
+    } else {
+      console.log('[ProcessManager] No stdout available for runId:', runId)
     }
 
     // Handle stderr
     if (childProcess.stderr) {
+      console.log('[ProcessManager] Setting up stderr listener for runId:', runId)
       childProcess.stderr.on('data', (data: Buffer) => {
         const output = data.toString()
+        console.log(
+          '[ProcessManager] Received stderr data for runId:',
+          runId,
+          'length:',
+          output.length
+        )
+        console.log('[ProcessManager] Stderr content:', JSON.stringify(output))
         this.appendLiveOutput(runId, output)
-        this.notifyUI('process-output', { runId, output, type: 'stderr' })
+        this.sendAgentEvent(runId, 'agent-error', output)
       })
+
+      childProcess.stderr.on('end', () => {
+        console.log('[ProcessManager] stderr stream ended for runId:', runId)
+      })
+
+      childProcess.stderr.on('error', (error) => {
+        console.error('[ProcessManager] stderr error for runId:', runId, error)
+      })
+    } else {
+      console.log('[ProcessManager] No stderr available for runId:', runId)
     }
+
+    // Add process event listeners for debugging
+    childProcess.on('spawn', () => {
+      console.log('[ProcessManager] Process spawned event for runId:', runId)
+
+      // Set up a periodic status check
+      const statusCheckInterval = setInterval(() => {
+        if (childProcess.killed) {
+          console.log('[ProcessManager] Process is killed for runId:', runId)
+          clearInterval(statusCheckInterval)
+        } else {
+          console.log(
+            '[ProcessManager] Process still running for runId:',
+            runId,
+            'PID:',
+            childProcess.pid
+          )
+        }
+      }, 10000) // Check every 10 seconds
+
+      // Clear interval when process ends
+      childProcess.on('close', () => {
+        clearInterval(statusCheckInterval)
+      })
+    })
+
+    childProcess.on('close', (code, signal) => {
+      console.log(
+        '[ProcessManager] Process closed for runId:',
+        runId,
+        'code:',
+        code,
+        'signal:',
+        signal
+      )
+    })
+
+    childProcess.on('exit', (code, signal) => {
+      console.log(
+        '[ProcessManager] Process exited for runId:',
+        runId,
+        'code:',
+        code,
+        'signal:',
+        signal
+      )
+    })
+
+    childProcess.on('error', (error) => {
+      console.error('[ProcessManager] Process error for runId:', runId, error)
+    })
   }
 
   /**
@@ -210,7 +401,7 @@ export class ProcessManager extends EventEmitter {
 
     handle.isFinished = true
     this.emit('processCompleted', { runId, result })
-    this.notifyUI('process-completed', { runId, result })
+    this.sendAgentEvent(runId, 'agent-complete', result.exitCode === 0)
   }
 
   /**
@@ -222,7 +413,7 @@ export class ProcessManager extends EventEmitter {
 
     handle.isFinished = true
     this.emit('processError', { runId, error })
-    this.notifyUI('process-error', { runId, error })
+    this.sendAgentEvent(runId, 'agent-complete', false)
   }
 
   /**
@@ -278,7 +469,7 @@ export class ProcessManager extends EventEmitter {
       this.processes.delete(runId)
 
       this.emit('processKilled', info)
-      this.notifyUI('process-killed', { runId })
+      this.sendAgentEvent(runId, 'agent-cancelled', true)
 
       return true
     } catch (error) {
@@ -404,6 +595,21 @@ export class ProcessManager extends EventEmitter {
   private notifyUI(event: string, data: any): void {
     if (this.browserWindow && !this.browserWindow.isDestroyed()) {
       this.browserWindow.webContents.send(event, data)
+    }
+  }
+
+  /**
+   * Send agent event with runId isolation
+   */
+  private sendAgentEvent(runId: number, eventType: string, data: any): void {
+    console.log(
+      `[ProcessManager] Sending event: ${eventType}:${runId}`,
+      data?.length ? `data length: ${data.length}` : data
+    )
+    if (this.browserWindow && !this.browserWindow.isDestroyed()) {
+      this.browserWindow.webContents.send(`${eventType}:${runId}`, data)
+    } else {
+      console.log(`[ProcessManager] Browser window not available for event: ${eventType}:${runId}`)
     }
   }
 

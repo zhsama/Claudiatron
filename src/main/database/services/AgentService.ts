@@ -41,6 +41,13 @@ export class AgentService {
   }
 
   /**
+   * Create a new agent (alias for createAgent)
+   */
+  async create(data: AgentCreateData): Promise<Agent> {
+    return await this.createAgent(data)
+  }
+
+  /**
    * Get all agents
    */
   async listAgents(): Promise<Agent[]> {
@@ -53,6 +60,13 @@ export class AgentService {
   }
 
   /**
+   * Get all agents (alias for listAgents)
+   */
+  async findAll(): Promise<Agent[]> {
+    return await this.listAgents()
+  }
+
+  /**
    * Get agent by ID
    */
   async getAgentById(id: number): Promise<Agent | null> {
@@ -61,6 +75,13 @@ export class AgentService {
       where: { id },
       relations: ['runs']
     })
+  }
+
+  /**
+   * Get agent by ID (alias for getAgentById)
+   */
+  async findById(id: number): Promise<Agent | null> {
+    return await this.getAgentById(id)
   }
 
   /**
@@ -81,6 +102,13 @@ export class AgentService {
   }
 
   /**
+   * Update agent (alias for updateAgent)
+   */
+  async update(id: number, data: Omit<AgentUpdateData, 'id'>): Promise<Agent | null> {
+    return await this.updateAgent({ ...data, id })
+  }
+
+  /**
    * Delete agent
    */
   async deleteAgent(id: number): Promise<boolean> {
@@ -88,6 +116,13 @@ export class AgentService {
 
     const result = await repository.delete(id)
     return result.affected ? result.affected > 0 : false
+  }
+
+  /**
+   * Delete agent (alias for deleteAgent)
+   */
+  async delete(id: number): Promise<boolean> {
+    return await this.deleteAgent(id)
   }
 
   /**

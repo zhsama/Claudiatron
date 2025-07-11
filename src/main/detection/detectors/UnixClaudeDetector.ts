@@ -63,6 +63,12 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
   private async detectViaShell(): Promise<ClaudeDetectionResult> {
     console.log('Detecting Claude via shell commands...')
 
+    // 首先尝试通过 Node.js 包管理器检测
+    const packageManagerResult = await this.detectViaPackageManagers()
+    if (packageManagerResult.success) {
+      return packageManagerResult
+    }
+
     const commands = ['claude', 'claude-code']
 
     for (const cmd of commands) {
@@ -114,6 +120,199 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
       platform: process.platform as 'darwin' | 'linux',
       executionMethod: 'native'
     }
+  }
+
+  /**
+   * 检测可用的 Node.js 包管理器
+   */
+  private async detectNodePackageManagers(): Promise<Array<{ name: string; command: string }>> {
+    const managers = [
+      { name: 'vfox', command: 'vfox' },
+      { name: 'fnm', command: 'fnm' },
+      { name: 'nvm', command: 'nvm' },
+      { name: 'n', command: 'n' },
+      { name: 'volta', command: 'volta' },
+      { name: 'nodenv', command: 'nodenv' }
+    ]
+
+    const availableManagers: Array<{ name: string; command: string }> = []
+    const shell = process.env.SHELL || '/bin/bash'
+
+    for (const manager of managers) {
+      try {
+        const checkCmd = `${shell} -l -c "command -v ${manager.command}"`
+        const result = await executeCommand(checkCmd, { timeout: 3000 })
+
+        if (result.exitCode === 0 && result.stdout.trim()) {
+          availableManagers.push(manager)
+          console.log(`Found package manager: ${manager.name}`)
+        }
+      } catch (error) {
+        // 忽略错误，继续检测下一个
+      }
+    }
+
+    return availableManagers
+  }
+
+  /**
+   * 通过 Node.js 包管理器检测 Claude
+   */
+  private async detectViaPackageManagers(): Promise<ClaudeDetectionResult> {
+    console.log('Detecting Claude via Node.js package managers...')
+
+    const availableManagers = await this.detectNodePackageManagers()
+
+    if (availableManagers.length === 0) {
+      console.log('No Node.js package managers found')
+      return {
+        success: false,
+        platform: process.platform as 'darwin' | 'linux',
+        executionMethod: 'native'
+      }
+    }
+
+    const shell = process.env.SHELL || '/bin/bash'
+
+    // 按优先级检测
+    for (const manager of availableManagers) {
+      try {
+        let claudeCmd: string
+
+        switch (manager.name) {
+          case 'vfox':
+            claudeCmd = `${shell} -l -c "~/.version-fox/shims/claude --version 2>/dev/null && echo ~/.version-fox/shims/claude || true"`
+            break
+          case 'fnm':
+            claudeCmd = `${shell} -l -c "fnm exec --using=default -- which claude 2>/dev/null || true"`
+            break
+          case 'nvm':
+            claudeCmd = `${shell} -l -c "source ~/.nvm/nvm.sh && nvm exec default which claude 2>/dev/null || true"`
+            break
+          case 'volta':
+            claudeCmd = `${shell} -l -c "volta run which claude 2>/dev/null || true"`
+            break
+          case 'nodenv':
+            claudeCmd = `${shell} -l -c "nodenv exec which claude 2>/dev/null || true"`
+            break
+          case 'n':
+            claudeCmd = `${shell} -l -c "which claude 2>/dev/null || true"`
+            break
+          default:
+            continue
+        }
+
+        const result = await executeCommand(claudeCmd, { timeout: 10000 })
+
+        if (result.exitCode === 0 && result.stdout.trim()) {
+          const claudePath = result.stdout.trim()
+          console.log(`Found Claude via ${manager.name}: ${claudePath}`)
+
+          // 验证并获取版本
+          let versionCmd: string
+          switch (manager.name) {
+            case 'vfox':
+              versionCmd = `${shell} -l -c "~/.version-fox/shims/claude --version"`
+              break
+            case 'fnm':
+              versionCmd = `${shell} -l -c "fnm exec --using=default -- claude --version"`
+              break
+            case 'nvm':
+              versionCmd = `${shell} -l -c "source ~/.nvm/nvm.sh && nvm exec default claude --version"`
+              break
+            case 'volta':
+              versionCmd = `${shell} -l -c "volta run claude --version"`
+              break
+            case 'nodenv':
+              versionCmd = `${shell} -l -c "nodenv exec claude --version"`
+              break
+            default:
+              versionCmd = `${shell} -l -c "claude --version"`
+          }
+
+          const versionResult = await executeCommand(versionCmd, { timeout: 5000 })
+          const version =
+            versionResult.exitCode === 0 ? this.parseVersion(versionResult.stdout) : 'unknown'
+
+          // 解析符号链接
+          const resolvedPath = await resolveSymlink(claudePath)
+          const pathInfo = this.extractPackageManagerInfo(resolvedPath)
+
+          return {
+            success: true,
+            platform: process.platform as 'darwin' | 'linux',
+            executionMethod: 'native',
+            claudePath,
+            version,
+            detectionMethod: manager.name,
+            resolvedPath: resolvedPath !== claudePath ? resolvedPath : undefined,
+            metadata: {
+              packageManager: manager.name,
+              ...pathInfo
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`${manager.name} detection failed:`, error)
+        continue
+      }
+    }
+
+    return {
+      success: false,
+      platform: process.platform as 'darwin' | 'linux',
+      executionMethod: 'native'
+    }
+  }
+
+  /**
+   * 从路径中提取包管理器信息
+   */
+  private extractPackageManagerInfo(path: string): Record<string, any> {
+    const info: Record<string, any> = {}
+
+    // vfox 信息
+    const vfoxMatch = path.match(/\.version-fox[\/\\](?:shims|cache[\/\\]nodejs[\/\\]current)/)
+    if (vfoxMatch) {
+      info.isFromVfox = true
+      // 尝试从当前目录结构推断 Node.js 版本
+      const versionMatch = path.match(/\.version-fox[\/\\]cache[\/\\]nodejs[\/\\]v([^\/\\]+)/)
+      if (versionMatch) {
+        info.nodeVersion = versionMatch[1]
+      }
+    }
+
+    // fnm 信息
+    const fnmMatch = path.match(
+      /fnm[\/\\](?:node-versions[\/\\]v([^\/\\]+)|aliases[\/\\]([^\/\\]+))/
+    )
+    if (fnmMatch) {
+      info.isFromFnm = true
+      info.nodeVersion = fnmMatch[1] || fnmMatch[2]
+    }
+
+    // nvm 信息
+    const nvmMatch = path.match(/nvm[\/\\]versions[\/\\]node[\/\\]v([^\/\\]+)/)
+    if (nvmMatch) {
+      info.isFromNvm = true
+      info.nodeVersion = nvmMatch[1]
+    }
+
+    // volta 信息
+    const voltaMatch = path.match(/volta[\/\\]tools[\/\\]image[\/\\]node[\/\\]([^\/\\]+)/)
+    if (voltaMatch) {
+      info.isFromVolta = true
+      info.nodeVersion = voltaMatch[1]
+    }
+
+    // nodenv 信息
+    const nodenvMatch = path.match(/nodenv[\/\\]versions[\/\\]([^\/\\]+)/)
+    if (nodenvMatch) {
+      info.isFromNodev = true
+      info.nodeVersion = nodenvMatch[1]
+    }
+
+    return info
   }
 
   /**
@@ -197,13 +396,51 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
       throw new Error('Claude not detected. Please run detection first.')
     }
 
+    // 如果检测到是通过包管理器安装的，使用对应的包管理器执行
+    const detectionResult = await this.getCachedResult()
+    const packageManager = detectionResult?.metadata?.packageManager
+
+    if (packageManager) {
+      const shell = process.env.SHELL || '/bin/bash'
+      let command: string
+
+      switch (packageManager) {
+        case 'vfox':
+          command = `${shell} -l -c "cd '${workingDir}' && ~/.version-fox/shims/claude ${args.join(' ')}"`
+          break
+        case 'fnm':
+          command = `${shell} -l -c "cd '${workingDir}' && fnm exec --using=default -- claude ${args.join(' ')}"`
+          break
+        case 'nvm':
+          command = `${shell} -l -c "cd '${workingDir}' && source ~/.nvm/nvm.sh && nvm exec default claude ${args.join(' ')}"`
+          break
+        case 'volta':
+          command = `${shell} -l -c "cd '${workingDir}' && volta run claude ${args.join(' ')}"`
+          break
+        case 'nodenv':
+          command = `${shell} -l -c "cd '${workingDir}' && nodenv exec claude ${args.join(' ')}"`
+          break
+        default:
+          command = `${shell} -l -c "cd '${workingDir}' && claude ${args.join(' ')}"`
+      }
+
+      console.log(`Executing Claude via ${packageManager}: ${command}`)
+
+      return executeCommand(command, {
+        cwd: workingDir,
+        timeout: 300000, // 5 分钟默认超时
+        ...options
+      })
+    }
+
     const command = `"${this.claudePath}" ${args.join(' ')}`
     console.log(`Executing Claude command: ${command}`)
 
     return executeCommand(command, {
       cwd: workingDir,
       timeout: 300000, // 5 分钟默认超时
-      ...options
+      ...options,
+      useLoginShell: true // 确保使用登录 shell
     })
   }
 
@@ -217,7 +454,41 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
 
     console.log(`Starting interactive Claude session in ${workingDir}`)
 
-    return spawnProcess(this.claudePath, args, {
+    // 如果检测到是通过包管理器安装的，使用对应的包管理器启动
+    const detectionResult = await this.getCachedResult()
+    const packageManager = detectionResult?.metadata?.packageManager
+    const shell = process.env.SHELL || '/bin/bash'
+
+    if (packageManager) {
+      let sessionCommand: string
+
+      switch (packageManager) {
+        case 'vfox':
+          sessionCommand = `cd '${workingDir}' && ~/.version-fox/shims/claude ${args.join(' ')}`
+          break
+        case 'fnm':
+          sessionCommand = `cd '${workingDir}' && fnm exec --using=default -- claude ${args.join(' ')}`
+          break
+        case 'nvm':
+          sessionCommand = `cd '${workingDir}' && source ~/.nvm/nvm.sh && nvm exec default claude ${args.join(' ')}`
+          break
+        case 'volta':
+          sessionCommand = `cd '${workingDir}' && volta run claude ${args.join(' ')}`
+          break
+        case 'nodenv':
+          sessionCommand = `cd '${workingDir}' && nodenv exec claude ${args.join(' ')}`
+          break
+        default:
+          sessionCommand = `cd '${workingDir}' && claude ${args.join(' ')}`
+      }
+
+      return spawnProcess(shell, ['-l', '-c', sessionCommand], {
+        cwd: workingDir
+      })
+    }
+
+    // 使用登录 shell 来启动
+    return spawnProcess(shell, ['-l', '-c', `cd '${workingDir}' && claude ${args.join(' ')}`], {
       cwd: workingDir
     })
   }

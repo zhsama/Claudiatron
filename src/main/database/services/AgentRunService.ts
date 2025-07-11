@@ -54,6 +54,13 @@ export class AgentRunService {
   }
 
   /**
+   * Create a new agent run (alias for createAgentRun)
+   */
+  async create(data: AgentRunCreateData): Promise<AgentRun> {
+    return await this.createAgentRun(data)
+  }
+
+  /**
    * Get all agent runs
    */
   async listAgentRuns(limit?: number, offset?: number): Promise<AgentRun[]> {
@@ -75,6 +82,13 @@ export class AgentRunService {
   }
 
   /**
+   * Get all agent runs (alias for listAgentRuns)
+   */
+  async findAll(limit?: number, offset?: number): Promise<AgentRun[]> {
+    return await this.listAgentRuns(limit, offset)
+  }
+
+  /**
    * Get agent runs by agent ID
    */
   async getRunsByAgentId(agentId: number, limit?: number): Promise<AgentRun[]> {
@@ -93,6 +107,13 @@ export class AgentRunService {
   }
 
   /**
+   * Get agent runs by agent ID (alias for getRunsByAgentId)
+   */
+  async findByAgentId(agentId: number, limit?: number): Promise<AgentRun[]> {
+    return await this.getRunsByAgentId(agentId, limit)
+  }
+
+  /**
    * Get agent run by ID
    */
   async getAgentRunById(id: number): Promise<AgentRun | null> {
@@ -101,6 +122,13 @@ export class AgentRunService {
       where: { id },
       relations: ['agent']
     })
+  }
+
+  /**
+   * Get agent run by ID (alias for getAgentRunById)
+   */
+  async findById(id: number): Promise<AgentRun | null> {
+    return await this.getAgentRunById(id)
   }
 
   /**
@@ -128,6 +156,13 @@ export class AgentRunService {
     Object.assign(agentRun, data)
 
     return await repository.save(agentRun)
+  }
+
+  /**
+   * Update agent run status
+   */
+  async updateStatus(id: number, status: string): Promise<AgentRun | null> {
+    return await this.updateAgentRun(id, { status })
   }
 
   /**

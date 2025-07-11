@@ -110,6 +110,7 @@ export interface ExecutionOptions {
   cwd?: string
   env?: Record<string, string>
   encoding?: BufferEncoding
+  useLoginShell?: boolean // 是否使用登录 shell（用于 macOS/Linux）
 }
 
 /**

@@ -1,8 +1,7 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain } from 'electron'
 import { promises as fs } from 'fs'
-import { join, dirname } from 'path'
+import { join } from 'path'
 import { homedir } from 'os'
-import { glob } from 'glob'
 import { agentService, agentRunService } from '../database/services'
 import { processManager } from '../process/ProcessManager'
 import { claudeBinaryManager } from '../detection/ClaudeBinaryManagerAdapter'
@@ -117,7 +116,25 @@ export function setupAgentsHandlers() {
         model?: string
       }
     ) => {
-      console.log('Main: execute-agent called with', { agentId, projectPath, task, model })
+      console.log('Main: execute-agent called with', {
+        agentId,
+        projectPath,
+        projectPathType: typeof projectPath,
+        task,
+        model
+      })
+
+      // Validate projectPath
+      if (typeof projectPath !== 'string') {
+        throw new Error(`Invalid projectPath: expected string, got ${typeof projectPath}`)
+      }
+
+      if (!projectPath.trim()) {
+        throw new Error('Invalid projectPath: path cannot be empty')
+      }
+
+      const normalizedProjectPath = projectPath.trim()
+
       try {
         // Get the agent from database
         const agent = await agentService.findById(agentId)
@@ -129,7 +146,7 @@ export function setupAgentsHandlers() {
 
         // Create .claude/settings.json with agent hooks if it doesn't exist
         if (agent.hooks) {
-          const claudeDir = join(projectPath, '.claude')
+          const claudeDir = join(normalizedProjectPath, '.claude')
           const settingsPath = join(claudeDir, 'settings.json')
 
           try {
@@ -155,7 +172,7 @@ export function setupAgentsHandlers() {
           agent_icon: agent.icon,
           task,
           model: executionModel,
-          project_path: projectPath,
+          project_path: normalizedProjectPath,
           session_id: '',
           status: 'pending'
         })
@@ -177,16 +194,34 @@ export function setupAgentsHandlers() {
           '--dangerously-skip-permissions'
         ]
 
+        console.log('Agent execution parameters:', {
+          agentId,
+          projectPath: normalizedProjectPath,
+          task: task.substring(0, 50) + (task.length > 50 ? '...' : ''),
+          model: executionModel,
+          binaryPath,
+          systemPromptLength: agent.system_prompt?.length || 0,
+          systemPromptPreview: agent.system_prompt?.substring(0, 100) + '...'
+        })
+
+        console.log(
+          'Final args array:',
+          args.map(
+            (arg, i) =>
+              `${i}: ${typeof arg === 'string' ? arg.substring(0, 50) + (arg.length > 50 ? '...' : '') : arg}`
+          )
+        )
+
         // Register the process with the process manager
         const runId = await processManager.registerAgentProcess(
           agentRun.id!,
           agent.name,
-          projectPath,
+          normalizedProjectPath,
           task,
           executionModel,
           binaryPath,
           args,
-          { cwd: projectPath }
+          {}
         )
 
         return { success: true, runId, message: 'Agent execution started' }
@@ -259,8 +294,8 @@ export function setupAgentsHandlers() {
       }
 
       // Try to read session JSONL file and calculate metrics
-      let metrics = null
-      let output = null
+      let metrics: any = null
+      let output: string | null = null
 
       if (run.session_id) {
         try {
@@ -290,7 +325,7 @@ export function setupAgentsHandlers() {
       const runningRuns = await agentRunService.getAgentRunsByStatus('running')
 
       // Cross-check with process manager to ensure they're actually running
-      const actuallyRunning = []
+      const actuallyRunning: any[] = []
       for (const run of runningRuns) {
         if (run.id && processManager.isProcessRunning(run.id)) {
           actuallyRunning.push(run)
@@ -423,12 +458,71 @@ export function setupAgentsHandlers() {
     }
   })
 
+  // Import agent from file
+  ipcMain.handle('import-agent-from-file', async (_, filePath: string) => {
+    console.log('Main: import-agent-from-file called with', filePath)
+    try {
+      // Read file content
+      const fileContent = await fs.readFile(filePath, 'utf-8')
+
+      // Parse and validate JSON
+      let exportData
+      try {
+        exportData = JSON.parse(fileContent)
+      } catch (parseError) {
+        throw new Error('The selected file is not a valid JSON file')
+      }
+
+      // Validate export format
+      if (!exportData.version || !exportData.agent) {
+        throw new Error('Invalid agent export format')
+      }
+
+      // Validate version
+      if (exportData.version !== 1) {
+        throw new Error(`Unsupported export version: ${exportData.version}`)
+      }
+
+      const agentData = exportData.agent
+
+      // Validate required fields
+      if (!agentData.name || !agentData.icon || !agentData.system_prompt) {
+        throw new Error('Invalid agent data: missing required fields')
+      }
+
+      // Check if agent with same name exists and modify name if needed
+      const existingAgents = await agentService.findAll()
+      const existingNames = existingAgents.map((a) => a.name)
+
+      let finalName = agentData.name
+      if (existingNames.includes(finalName)) {
+        finalName = `${agentData.name} (Imported)`
+      }
+
+      // Create the agent
+      return await agentService.create({
+        name: finalName,
+        icon: agentData.icon,
+        system_prompt: agentData.system_prompt,
+        default_task: agentData.default_task,
+        model: agentData.model || 'sonnet',
+        enable_file_read: true,
+        enable_file_write: true,
+        enable_network: false,
+        hooks: agentData.hooks
+      })
+    } catch (error) {
+      console.error('Error importing agent from file:', error)
+      throw new Error(error instanceof Error ? error.message : 'Failed to import agent from file')
+    }
+  })
+
   // Cleanup finished processes
   ipcMain.handle('cleanup-finished-processes', async () => {
     console.log('Main: cleanup-finished-processes called')
     try {
       const runningRuns = await agentRunService.getAgentRunsByStatus('running')
-      const cleanedUp = []
+      const cleanedUp: number[] = []
 
       for (const run of runningRuns) {
         if (run.id && !processManager.isProcessRunning(run.id)) {

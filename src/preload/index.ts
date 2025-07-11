@@ -46,6 +46,7 @@ const api = {
   getSessionOutput: (runId: number) => ipcRenderer.invoke('get-session-output', runId),
   exportAgent: (id: number) => ipcRenderer.invoke('export-agent', id),
   importAgent: (jsonData: string) => ipcRenderer.invoke('import-agent', jsonData),
+  importAgentFromFile: (filePath: string) => ipcRenderer.invoke('import-agent-from-file', filePath),
   cleanupFinishedProcesses: () => ipcRenderer.invoke('cleanup-finished-processes'),
 
   // MCP Management
@@ -199,13 +200,35 @@ const api = {
     ipcRenderer.on('stream-output', callback)
   },
   onAgentOutput: (callback: (event: any, data: any) => void) => {
-    ipcRenderer.on('agent-output', callback)
+    const wrappedCallback = (event: any, data: any) => {
+      console.log(
+        '[Preload] Received agent-output event:',
+        event.sender,
+        event.returnValue,
+        data?.length ? `data length: ${data.length}` : data
+      )
+      callback(event, data)
+    }
+    ipcRenderer.on('agent-output', wrappedCallback)
   },
   onAgentError: (callback: (event: any, data: any) => void) => {
     ipcRenderer.on('agent-error', callback)
   },
   onAgentComplete: (callback: (event: any, data: any) => void) => {
     ipcRenderer.on('agent-complete', callback)
+  },
+  onAgentCancelled: (callback: (event: any, data: any) => void) => {
+    ipcRenderer.on('agent-cancelled', callback)
+  },
+
+  // 动态事件监听器 - 支持特定事件名称
+  addEventListener: (eventName: string, callback: (event: any, data: any) => void) => {
+    console.log('[Preload] Adding event listener for:', eventName)
+    ipcRenderer.on(eventName, callback)
+    return () => {
+      console.log('[Preload] Removing event listener for:', eventName)
+      ipcRenderer.removeAllListeners(eventName)
+    }
   },
 
   removeAllListeners: (channel: string) => {
