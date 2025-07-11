@@ -63,6 +63,21 @@ jobs:
         run: |
           echo "Building for ${{ matrix.platform }}..."
           pnpm build:${{ matrix.platform }}
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-artifacts
+          path: |
+            dist/*.exe
+            dist/*.msi
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.snap
+            dist/*.zip
+            dist/*.tar.gz
+          if-no-files-found: ignore
 
   # 创建 GitHub Release
   create-release:
@@ -75,6 +90,24 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Move artifacts to dist directory
+        run: |
+          mkdir -p dist
+          find artifacts -name "*.exe" -exec cp {} dist/ \;
+          find artifacts -name "*.msi" -exec cp {} dist/ \;
+          find artifacts -name "*.dmg" -exec cp {} dist/ \;
+          find artifacts -name "*.AppImage" -exec cp {} dist/ \;
+          find artifacts -name "*.deb" -exec cp {} dist/ \;
+          find artifacts -name "*.snap" -exec cp {} dist/ \;
+          find artifacts -name "*.zip" -exec cp {} dist/ \;
+          find artifacts -name "*.tar.gz" -exec cp {} dist/ \;
+          ls -la dist/
           
       - name: Get version
         id: version
