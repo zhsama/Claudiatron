@@ -38,7 +38,6 @@ linux:
   icon: build/icon.png
   target:
     - AppImage
-    - snap
     - deb
   maintainer: haleclpse.org
   category: Utility
