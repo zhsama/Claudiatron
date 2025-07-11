@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { WindowControls } from './WindowControls'
 
 interface TitleBarProps {
   /**
@@ -32,11 +33,9 @@ export const TitleBar: React.FC<TitleBarProps> = ({ className }) => {
       {/* App Name */}
       <div className="text-sm font-medium text-foreground">{t('titleBar.appName')}</div>
 
-      {/* Future: Window controls for Windows/Linux */}
+      {/* Window controls for Windows/Linux */}
       {!navigator.platform.includes('Mac') && (
-        <div className="absolute right-0 top-0 h-full app-region-no-drag">
-          {/* Placeholder for future window control buttons */}
-        </div>
+        <WindowControls className="absolute right-0 top-0 h-full" />
       )}
     </motion.div>
   )

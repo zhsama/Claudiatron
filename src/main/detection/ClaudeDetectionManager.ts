@@ -65,7 +65,8 @@ export class ClaudeDetectionManager implements ClaudeExecutor {
         executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
         error: {
           type: 'EXECUTION_FAILED',
-          message: (error instanceof Error ? error.message : String(error)) || 'Unknown detection error',
+          message:
+            (error instanceof Error ? error.message : String(error)) || 'Unknown detection error',
           platform: process.platform,
           details: error
         },

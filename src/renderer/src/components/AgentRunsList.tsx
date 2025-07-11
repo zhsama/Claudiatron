@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { Play, Clock, Hash, Bot } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
 } from '@/components/ui/pagination'
 import { cn } from '@/lib/utils'
 import { formatISOTimestamp } from '@/lib/date-utils'
@@ -195,12 +195,14 @@ export const AgentRunsList: React.FC<AgentRunsListProps> = ({ runs, onRunClick, 
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
+                  <PaginationPrevious
                     onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-                    className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={
+                      currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                    }
                   />
                 </PaginationItem>
-                
+
                 {[...Array(totalPages)].map((_, i) => (
                   <PaginationItem key={i + 1}>
                     <PaginationLink
@@ -212,18 +214,21 @@ export const AgentRunsList: React.FC<AgentRunsListProps> = ({ runs, onRunClick, 
                     </PaginationLink>
                   </PaginationItem>
                 ))}
-                
+
                 <PaginationItem>
-                  <PaginationNext 
+                  <PaginationNext
                     onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-                    className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={
+                      currentPage >= totalPages
+                        ? 'pointer-events-none opacity-50'
+                        : 'cursor-pointer'
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
         )}
-
       </div>
 
       {/* Agent Run Output Viewer Modal */}

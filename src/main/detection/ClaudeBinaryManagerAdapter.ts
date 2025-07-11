@@ -80,7 +80,8 @@ class ClaudeBinaryManagerAdapter {
     } catch (error) {
       return {
         is_installed: false,
-        output: (error instanceof Error ? error.message : String(error)) || 'Claude Code detection failed'
+        output:
+          (error instanceof Error ? error.message : String(error)) || 'Claude Code detection failed'
       }
     }
   }
@@ -220,7 +221,6 @@ class ClaudeBinaryManagerAdapter {
   getLastDetectionResult(): ClaudeDetectionResult | undefined {
     return this.cachedResult || claudeDetectionManager.getLastDetectionResult()
   }
-
 
   /**
    * 根据检测方法获取来源描述

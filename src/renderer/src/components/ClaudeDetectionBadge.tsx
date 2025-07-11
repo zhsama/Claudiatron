@@ -49,7 +49,9 @@ export const ClaudeDetectionBadge: React.FC<ClaudeDetectionBadgeProps> = ({ clas
         success: false,
         platform: process.platform || 'unknown',
         executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
-        error: { message: (error instanceof Error ? error.message : String(error)) || 'Detection failed' }
+        error: {
+          message: (error instanceof Error ? error.message : String(error)) || 'Detection failed'
+        }
       })
     } finally {
       setIsLoading(false)

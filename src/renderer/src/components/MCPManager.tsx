@@ -94,18 +94,20 @@ export const MCPManager: React.FC<MCPManagerProps> = ({ onBack, className }) => 
     loadServers()
     if (failed === 0) {
       setToast({
-        message: t(
-          'importExport.messages.importPartialSuccess',
-          { count: imported, imported, failed }
-        ),
+        message: t('importExport.messages.importPartialSuccess', {
+          count: imported,
+          imported,
+          failed
+        }),
         type: 'success'
       })
     } else {
       setToast({
-        message: t(
-          'importExport.messages.importPartialSuccess',
-          { count: imported, imported, failed }
-        ),
+        message: t('importExport.messages.importPartialSuccess', {
+          count: imported,
+          imported,
+          failed
+        }),
         type: 'error'
       })
     }
