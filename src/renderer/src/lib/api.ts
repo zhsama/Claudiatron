@@ -819,8 +819,8 @@ export const api = {
    */
   async importAgentFromFile(filePath: string): Promise<Agent> {
     try {
-      // TODO: Add importAgentFromFile to preload API
-      throw new Error('importAgentFromFile not implemented in Electron version yet')
+      const api = getWindowApi()
+      return await api.importAgentFromFile(filePath)
     } catch (error) {
       console.error('Failed to import agent from file:', error)
       throw error
@@ -843,10 +843,25 @@ export const api = {
   ): Promise<number> {
     try {
       const api = getWindowApi()
-      return await api.executeAgent({ agentId, projectPath, task, model })
+      const result = await api.executeAgent({ agentId, projectPath, task, model })
+
+      // 适配后端返回的对象格式到前端期望的 number 类型
+      if (result && typeof result === 'object' && 'success' in result) {
+        if (result.success && result.runId !== undefined) {
+          return result.runId
+        } else {
+          throw new Error(result.message || 'Failed to execute agent')
+        }
+      }
+
+      // 如果返回的是 number 类型（向后兼容）
+      if (typeof result === 'number') {
+        return result
+      }
+
+      throw new Error('Unexpected response format from executeAgent')
     } catch (error) {
       console.error('Failed to execute agent:', error)
-      // Return a sentinel value to indicate error
       throw new Error(
         `Failed to execute agent: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -927,12 +942,23 @@ export const api = {
   async killAgentSession(runId: number): Promise<boolean> {
     try {
       const api = getWindowApi()
-      return await api.killAgentSession(runId)
+      const result = await api.killAgentSession(runId)
+
+      // 适配后端返回的对象格式到前端期望的 boolean 类型
+      if (result && typeof result === 'object' && 'success' in result) {
+        return result.success
+      }
+
+      // 如果返回的是 boolean 类型（向后兼容）
+      if (typeof result === 'boolean') {
+        return result
+      }
+
+      // 默认返回 false
+      return false
     } catch (error) {
       console.error('Failed to kill agent session:', error)
-      throw new Error(
-        `Failed to kill agent session: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      return false
     }
   },
 
@@ -1925,5 +1951,96 @@ export const api = {
       console.error('Failed to delete slash command:', error)
       throw error
     }
+  }
+}
+
+// Export additional functions from window.api
+export const open = async (options?: any) => {
+  const windowApi = getWindowApi()
+  return windowApi.showOpenDialog(options)
+}
+
+export const save = async (options?: any) => {
+  const windowApi = getWindowApi()
+  return windowApi.showSaveDialog(options)
+}
+
+export const invoke = async (command: string, args?: any) => {
+  console.log(`Invoke: ${command}`, args)
+  // This is a placeholder for Tauri-style invoke calls
+  // In Electron, we use specific IPC handlers instead
+  return {}
+}
+
+export const listen = <T>(
+  event: string,
+  callback: (event: { payload: T }) => void
+): (() => void) => {
+  const windowApi = getWindowApi()
+
+  // 解析事件名和runId
+  const [eventType, runId] = event.split(':')
+
+  // 包装回调函数，将数据格式从 Electron 格式转换为原版 Tauri 格式
+  const wrappedCallback = (electronEvent: any, data: T) => {
+    // 包装数据为原版 event.payload 格式
+    callback({ payload: data })
+  }
+
+  if (runId) {
+    // 监听特定runId的事件
+    const handler = (electronEvent: any, data: T) => {
+      callback({ payload: data })
+    }
+
+    // 使用动态事件监听器来监听特定的事件名称
+    if (windowApi && windowApi.addEventListener) {
+      console.log('[API] Setting up dynamic listener for event:', event)
+      return windowApi.addEventListener(event, handler)
+    }
+  }
+
+  // 回退到通用事件监听（原有逻辑）
+  if (event.startsWith('stream-output') && windowApi.onStreamOutput) {
+    windowApi.onStreamOutput(wrappedCallback)
+    return () => windowApi.removeAllListeners('stream-output')
+  }
+  if (event.startsWith('agent-output') && windowApi.onAgentOutput) {
+    windowApi.onAgentOutput(wrappedCallback)
+    return () => windowApi.removeAllListeners('agent-output')
+  }
+  if (event.startsWith('agent-error') && windowApi.onAgentError) {
+    windowApi.onAgentError(wrappedCallback)
+    return () => windowApi.removeAllListeners('agent-error')
+  }
+  if (event.startsWith('agent-complete') && windowApi.onAgentComplete) {
+    windowApi.onAgentComplete(wrappedCallback)
+    return () => windowApi.removeAllListeners('agent-complete')
+  }
+  if (event.startsWith('agent-cancelled') && windowApi.onAgentCancelled) {
+    windowApi.onAgentCancelled(wrappedCallback)
+    return () => windowApi.removeAllListeners('agent-cancelled')
+  }
+
+  console.log(`Listen for event: ${event} - event system not fully implemented`)
+  return () => {} // Return a no-op unlisten function
+}
+
+export type UnlistenFn = () => void
+
+export const openUrl = async (url: string) => {
+  window.open(url, '_blank')
+}
+
+export const convertFileSrc = (filePath: string) => {
+  return `file://${filePath}`
+}
+
+export const getCurrentWebviewWindow = () => {
+  return {
+    setResizable: () => {},
+    setAlwaysOnTop: () => {},
+    show: () => {},
+    hide: () => {}
   }
 }
