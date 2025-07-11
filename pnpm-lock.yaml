@@ -14,6 +14,37 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^4.0.0
         version: 4.0.0(electron@35.7.0)
+      better-sqlite3:
+        specifier: ^12.2.0
+        version: 12.2.0
+      electron-updater:
+        specifier: ^6.3.9
+        version: 6.6.2
+      execa:
+        specifier: ^9.6.0
+        version: 9.6.0
+      glob:
+        specifier: ^11.0.3
+        version: 11.0.3
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      tree-kill:
+        specifier: ^1.2.2
+        version: 1.2.2
+      typeorm:
+        specifier: ^0.3.25
+        version: 0.3.25(better-sqlite3@12.2.0)(reflect-metadata@0.2.2)
+    devDependencies:
+      '@electron-toolkit/eslint-config-prettier':
+        specifier: ^3.0.0
+        version: 3.0.0(eslint@9.30.1(jiti@2.4.2))(prettier@3.6.2)
+      '@electron-toolkit/eslint-config-ts':
+        specifier: ^3.0.0
+        version: 3.1.0(eslint@9.30.1(jiti@2.4.2))(typescript@5.8.3)
+      '@electron-toolkit/tsconfig':
+        specifier: ^1.0.1
+        version: 1.0.1(@types/node@22.16.0)
       '@hookform/resolvers':
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.60.0(react@19.1.0))
@@ -62,106 +93,6 @@ importers:
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
-      '@uiw/react-md-editor':
-        specifier: ^4.0.7
-        version: 4.0.7(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      ansi-to-html:
-        specifier: ^0.7.2
-        version: 0.7.2
-      better-sqlite3:
-        specifier: ^12.2.0
-        version: 12.2.0
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      date-fns:
-        specifier: ^4.1.0
-        version: 4.1.0
-      diff:
-        specifier: ^8.0.2
-        version: 8.0.2
-      electron-updater:
-        specifier: ^6.3.9
-        version: 6.6.2
-      execa:
-        specifier: ^9.6.0
-        version: 9.6.0
-      framer-motion:
-        specifier: ^12.23.0
-        version: 12.23.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      glob:
-        specifier: ^11.0.3
-        version: 11.0.3
-      html2canvas:
-        specifier: ^1.4.1
-        version: 1.4.1
-      i18next:
-        specifier: ^25.3.2
-        version: 25.3.2(typescript@5.8.3)
-      i18next-browser-languagedetector:
-        specifier: ^8.2.0
-        version: 8.2.0
-      lucide-react:
-        specifier: ^0.525.0
-        version: 0.525.0(react@19.1.0)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      radix-ui:
-        specifier: ^1.4.2
-        version: 1.4.2(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      react-hook-form:
-        specifier: ^7.60.0
-        version: 7.60.0(react@19.1.0)
-      react-i18next:
-        specifier: ^15.6.0
-        version: 15.6.0(i18next@25.3.2(typescript@5.8.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
-      react-markdown:
-        specifier: ^10.1.0
-        version: 10.1.0(@types/react@19.1.8)(react@19.1.0)
-      react-syntax-highlighter:
-        specifier: ^15.6.1
-        version: 15.6.1(react@19.1.0)
-      recharts:
-        specifier: ^3.0.2
-        version: 3.0.2(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-      remark-gfm:
-        specifier: ^4.0.1
-        version: 4.0.1
-      sonner:
-        specifier: ^2.0.6
-        version: 2.0.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      tailwind-merge:
-        specifier: ^3.3.1
-        version: 3.3.1
-      tailwindcss:
-        specifier: ^4.1.11
-        version: 4.1.11
-      tree-kill:
-        specifier: ^1.2.2
-        version: 1.2.2
-      typeorm:
-        specifier: ^0.3.25
-        version: 0.3.25(better-sqlite3@12.2.0)(reflect-metadata@0.2.2)
-      zod:
-        specifier: ^3.25.75
-        version: 3.25.75
-    devDependencies:
-      '@electron-toolkit/eslint-config-prettier':
-        specifier: ^3.0.0
-        version: 3.0.0(eslint@9.30.1(jiti@2.4.2))(prettier@3.6.2)
-      '@electron-toolkit/eslint-config-ts':
-        specifier: ^3.0.0
-        version: 3.1.0(eslint@9.30.1(jiti@2.4.2))(typescript@5.8.3)
-      '@electron-toolkit/tsconfig':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/node@22.16.0)
       '@types/diff':
         specifier: ^8.0.0
         version: 8.0.0
@@ -177,9 +108,27 @@ importers:
       '@types/react-syntax-highlighter':
         specifier: ^15.5.13
         version: 15.5.13
+      '@uiw/react-md-editor':
+        specifier: ^4.0.7
+        version: 4.0.7(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.6.0(vite@6.3.5(@types/node@22.16.0)(jiti@2.4.2)(lightningcss@1.30.1))
+      ansi-to-html:
+        specifier: ^0.7.2
+        version: 0.7.2
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
+      diff:
+        specifier: ^8.0.2
+        version: 8.0.2
       electron:
         specifier: ^35.1.5
         version: 35.7.0
@@ -201,15 +150,63 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.19
         version: 0.4.20(eslint@9.30.1(jiti@2.4.2))
+      framer-motion:
+        specifier: ^12.23.0
+        version: 12.23.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      html2canvas:
+        specifier: ^1.4.1
+        version: 1.4.1
+      i18next:
+        specifier: ^25.3.2
+        version: 25.3.2(typescript@5.8.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.2.0
+        version: 8.2.0
+      lucide-react:
+        specifier: ^0.525.0
+        version: 0.525.0(react@19.1.0)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       prettier:
         specifier: ^3.5.3
         version: 3.6.2
+      radix-ui:
+        specifier: ^1.4.2
+        version: 1.4.2(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: ^19.1.0
         version: 19.1.0
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      react-hook-form:
+        specifier: ^7.60.0
+        version: 7.60.0(react@19.1.0)
+      react-i18next:
+        specifier: ^15.6.0
+        version: 15.6.0(i18next@25.3.2(typescript@5.8.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.1.8)(react@19.1.0)
+      react-syntax-highlighter:
+        specifier: ^15.6.1
+        version: 15.6.1(react@19.1.0)
+      recharts:
+        specifier: ^3.0.2
+        version: 3.0.2(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+      sonner:
+        specifier: ^2.0.6
+        version: 2.0.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      tailwind-merge:
+        specifier: ^3.3.1
+        version: 3.3.1
+      tailwindcss:
+        specifier: ^4.1.11
+        version: 4.1.11
       tw-animate-css:
         specifier: ^1.3.5
         version: 1.3.5
@@ -219,6 +216,9 @@ importers:
       vite:
         specifier: ^6.2.6
         version: 6.3.5(@types/node@22.16.0)(jiti@2.4.2)(lightningcss@1.30.1)
+      zod:
+        specifier: ^3.25.75
+        version: 3.25.75
 
 packages:
 

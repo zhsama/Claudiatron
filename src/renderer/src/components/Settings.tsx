@@ -15,6 +15,7 @@ import { StorageTab } from './StorageTab'
 import { HooksEditor } from './HooksEditor'
 import { SlashCommandsManager } from './SlashCommandsManager'
 import { LanguageSelector } from './LanguageSelector'
+import { EnvVarInput } from './EnvVarInput'
 import { useTranslation } from 'react-i18next'
 
 interface SettingsProps {
@@ -45,7 +46,6 @@ interface EnvironmentVariable {
  */
 export const Settings: React.FC<SettingsProps> = ({ onBack, className }) => {
   const { t } = useTranslation('settings')
-  const { t: tCommon } = useTranslation('common')
   const [settings, setSettings] = useState<ClaudeSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -55,6 +55,95 @@ export const Settings: React.FC<SettingsProps> = ({ onBack, className }) => {
   const [selectedInstallation, setSelectedInstallation] = useState<ClaudeInstallation | null>(null)
   const [binaryPathChanged, setBinaryPathChanged] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  // Environment variable suggestions
+  const envVarSuggestions = [
+    // Authentication & API
+    { key: 'ANTHROPIC_API_KEY', description: t('environment.commonVariables.apiKey') },
+    { key: 'ANTHROPIC_AUTH_TOKEN', description: t('environment.commonVariables.authToken') },
+    {
+      key: 'ANTHROPIC_CUSTOM_HEADERS',
+      description: t('environment.commonVariables.customHeaders')
+    },
+
+    // Model Configuration
+    { key: 'ANTHROPIC_MODEL', description: t('environment.commonVariables.model') },
+    {
+      key: 'ANTHROPIC_SMALL_FAST_MODEL',
+      description: t('environment.commonVariables.smallFastModel')
+    },
+    {
+      key: 'ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION',
+      description: t('environment.commonVariables.smallFastModelAwsRegion')
+    },
+
+    // Claude Code Settings
+    {
+      key: 'CLAUDE_CODE_API_KEY_HELPER_TTL_MS',
+      description: t('environment.commonVariables.apiKeyHelperTtl')
+    },
+    {
+      key: 'CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL',
+      description: t('environment.commonVariables.ideSkipAutoInstall')
+    },
+    {
+      key: 'CLAUDE_CODE_MAX_OUTPUT_TOKENS',
+      description: t('environment.commonVariables.maxOutputTokens')
+    },
+
+    // Platform Integration
+    { key: 'CLAUDE_CODE_USE_BEDROCK', description: t('environment.commonVariables.useBedrock') },
+    { key: 'CLAUDE_CODE_USE_VERTEX', description: t('environment.commonVariables.useVertex') },
+    {
+      key: 'CLAUDE_CODE_SKIP_BEDROCK_AUTH',
+      description: t('environment.commonVariables.skipBedrockAuth')
+    },
+    {
+      key: 'CLAUDE_CODE_SKIP_VERTEX_AUTH',
+      description: t('environment.commonVariables.skipVertexAuth')
+    },
+
+    // Execution Control
+    { key: 'BASH_DEFAULT_TIMEOUT_MS', description: t('environment.commonVariables.bashTimeout') },
+    { key: 'BASH_MAX_TIMEOUT_MS', description: t('environment.commonVariables.bashMaxTimeout') },
+    {
+      key: 'BASH_MAX_OUTPUT_LENGTH',
+      description: t('environment.commonVariables.bashMaxOutputLength')
+    },
+    {
+      key: 'CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR',
+      description: t('environment.commonVariables.maintainProjectWorkingDir')
+    },
+    { key: 'MAX_THINKING_TOKENS', description: t('environment.commonVariables.maxThinkingTokens') },
+    { key: 'MCP_TIMEOUT', description: t('environment.commonVariables.mcpTimeout') },
+    { key: 'MCP_TOOL_TIMEOUT', description: t('environment.commonVariables.mcpToolTimeout') },
+    { key: 'MAX_MCP_OUTPUT_TOKENS', description: t('environment.commonVariables.maxMcpTokens') },
+
+    // Network & Proxy
+    { key: 'HTTP_PROXY', description: t('environment.commonVariables.httpProxy') },
+    { key: 'HTTPS_PROXY', description: t('environment.commonVariables.httpsProxy') },
+
+    // Feature Control
+    { key: 'DISABLE_TELEMETRY', description: t('environment.commonVariables.disableTelemetry') },
+    {
+      key: 'DISABLE_ERROR_REPORTING',
+      description: t('environment.commonVariables.disableErrorReporting')
+    },
+    { key: 'DISABLE_COST_WARNINGS', description: t('environment.commonVariables.costWarnings') },
+    {
+      key: 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC',
+      description: t('environment.commonVariables.disableNonessentialTraffic')
+    },
+    {
+      key: 'DISABLE_AUTOUPDATER',
+      description: t('environment.commonVariables.disableAutoupdater')
+    },
+    { key: 'DISABLE_BUG_COMMAND', description: t('environment.commonVariables.disableBugCommand') },
+    {
+      key: 'DISABLE_NON_ESSENTIAL_MODEL_CALLS',
+      description: t('environment.commonVariables.disableNonEssentialModelCalls')
+    }
+  ]
 
   // Permission rules state
   const [allowRules, setAllowRules] = useState<PermissionRule[]>([])
@@ -660,11 +749,14 @@ export const Settings: React.FC<SettingsProps> = ({ onBack, className }) => {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-2"
                           >
-                            <Input
-                              placeholder={t('environment.keyPlaceholder')}
+                            <EnvVarInput
                               value={envVar.key}
-                              onChange={(e) => updateEnvVar(envVar.id, 'key', e.target.value)}
-                              className="flex-1 font-mono text-sm"
+                              onChange={(newValue) => updateEnvVar(envVar.id, 'key', newValue)}
+                              suggestions={envVarSuggestions}
+                              existingKeys={envVars
+                                .filter((v) => v.id !== envVar.id)
+                                .map((v) => v.key)}
+                              placeholder={t('environment.keyPlaceholder')}
                             />
                             <span className="text-muted-foreground">=</span>
                             <Input
@@ -691,27 +783,15 @@ export const Settings: React.FC<SettingsProps> = ({ onBack, className }) => {
                         <strong>{t('environment.commonVariables.title')}</strong>
                       </p>
                       <ul className="text-xs text-muted-foreground space-y-1 ml-4">
-                        <li>
-                          •{' '}
-                          <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                            CLAUDE_CODE_ENABLE_TELEMETRY
-                          </code>{' '}
-                          - {t('environment.commonVariables.telemetry')}
-                        </li>
-                        <li>
-                          •{' '}
-                          <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                            ANTHROPIC_MODEL
-                          </code>{' '}
-                          - {t('environment.commonVariables.model')}
-                        </li>
-                        <li>
-                          •{' '}
-                          <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                            DISABLE_COST_WARNINGS
-                          </code>{' '}
-                          - {t('environment.commonVariables.costWarnings')}
-                        </li>
+                        {envVarSuggestions.map((suggestion) => (
+                          <li key={suggestion.key}>
+                            •{' '}
+                            <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                              {suggestion.key}
+                            </code>{' '}
+                            - {suggestion.description}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>

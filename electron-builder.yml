@@ -3,12 +3,15 @@ productName: Claudiatron
 directories:
   buildResources: build
 files:
+  - out/**/*
   - '!**/.vscode/*'
+  - '!**/.claude/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!out/**/*.map'
+asar: true
 asarUnpack:
   - resources/**
 win:
@@ -28,6 +31,7 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  identity: null
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -36,7 +40,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: haleclpse.org
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
