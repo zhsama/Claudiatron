@@ -157,5 +157,117 @@
   },
   "filePicker": {
     "navigation": "↑↓ Navigate • Enter Select • → Enter Directory • ← Go Back • Esc Close"
+  },
+  "agents": {
+    "title": "CC Agents",
+    "description": "Manage your Claude Code agents",
+    "buttons": {
+      "create": "Create CC Agent",
+      "import": "Import",
+      "execute": "Execute",
+      "edit": "Edit",
+      "export": "Export",
+      "delete": "Delete",
+      "previous": "Previous",
+      "next": "Next",
+      "cancel": "Cancel"
+    },
+    "import": {
+      "fromFile": "From File",
+      "fromGitHub": "From GitHub"
+    },
+    "empty": {
+      "title": "No agents yet",
+      "description": "Create your first CC Agent to get started"
+    },
+    "pagination": {
+      "page": "Page {{current}} of {{total}}"
+    },
+    "execution": {
+      "title": "Recent Executions",
+      "noHistory": "No execution history yet",
+      "projectPath": "Project Path",
+      "selectProjectPath": "Select or enter project path",
+      "task": "Task",
+      "readyToExecute": "Ready to Execute",
+      "selectProjectAndTask": "Select a project path and enter a task to run the agent",
+      "executeAgent": "Execute: {{name}}",
+      "fullscreen": "Fullscreen"
+    },
+    "card": {
+      "created": "Created: {{date}}"
+    },
+    "dialog": {
+      "delete": {
+        "title": "Delete Agent",
+        "description": "Are you sure you want to delete the agent \"{{name}}\"? This action cannot be undone and will permanently remove the agent and all its associated data."
+      },
+      "deleting": "Deleting..."
+    },
+    "toast": {
+      "created": "Agent created successfully",
+      "updated": "Agent updated successfully",
+      "deleted": "Agent deleted successfully",
+      "exported": "Agent \"{{name}}\" exported successfully",
+      "imported": "Agent imported successfully",
+      "importedFromGitHub": "Agent imported successfully from GitHub",
+      "exportFailed": "Failed to export agent",
+      "importFailed": "Failed to import agent",
+      "deleteFailed": "Failed to delete agent",
+      "loadFailed": "Failed to load agents"
+    },
+    "tooltips": {
+      "execute": "Execute agent",
+      "edit": "Edit agent",
+      "export": "Export agent to .claudia.json",
+      "delete": "Delete agent"
+    }
+  },
+  "createAgent": {
+    "title": {
+      "create": "Create CC Agent",
+      "edit": "Edit CC Agent"
+    },
+    "description": {
+      "create": "Create a new Claude Code agent",
+      "edit": "Update your Claude Code agent"
+    },
+    "buttons": {
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "form": {
+      "basicInformation": "Basic Information",
+      "agentName": "Agent Name",
+      "agentIcon": "Agent Icon",
+      "model": "Model",
+      "defaultTask": "Default Task (Optional)",
+      "systemPrompt": "System Prompt"
+    },
+    "placeholders": {
+      "agentName": "e.g., Code Assistant",
+      "defaultTask": "e.g., Review this code for security issues"
+    },
+    "descriptions": {
+      "defaultTask": "This will be used as the default task placeholder when executing the agent",
+      "systemPrompt": "Define the behavior and capabilities of your CC Agent"
+    },
+    "models": {
+      "sonnet": {
+        "name": "Claude 4 Sonnet",
+        "description": "Faster, efficient for most tasks"
+      },
+      "opus": {
+        "name": "Claude 4 Opus",
+        "description": "More capable, better for complex tasks"
+      }
+    },
+    "errors": {
+      "nameRequired": "Agent name is required",
+      "systemPromptRequired": "System prompt is required",
+      "createFailed": "Failed to create agent",
+      "updateFailed": "Failed to update agent"
+    },
+    "confirmLeave": "You have unsaved changes. Are you sure you want to leave?"
   }
 }
