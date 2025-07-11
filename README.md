@@ -52,12 +52,14 @@ Think of Claudiatron as your command center for Claude Code - bridging the gap b
 ## ✨ Features
 
 ### 🗂️ **Project & Session Management**
+
 - **Visual Project Browser**: Navigate through all your Claude Code projects in `~/.claude/projects/`
 - **Session History**: View and resume past coding sessions with full context
 - **Smart Search**: Find projects and sessions quickly with built-in search
 - **Session Insights**: See first messages, timestamps, and session metadata at a glance
 
 ### 🤖 **AI Agents System**
+
 - **Custom AI Agents**: Create specialized agents with custom system prompts and behaviors
 - **Agent Library**: Build a collection of purpose-built agents for different tasks
 - **Background Execution**: Run agents in separate processes for non-blocking operations
@@ -65,12 +67,14 @@ Think of Claudiatron as your command center for Claude Code - bridging the gap b
 - **GitHub Agent Import**: Import predefined agent configurations from GitHub
 
 ### 📊 **Usage Analytics Dashboard**
+
 - **Cost Tracking**: Monitor your Claude API usage and costs in real-time
 - **Token Analytics**: Detailed breakdown by model, project, and time period
 - **Visual Charts**: Beautiful charts showing usage trends and patterns
 - **Export Data**: Export usage data for accounting and analysis
 
 ### 🔌 **MCP Server Management**
+
 - **Server Registry**: Manage Model Context Protocol servers from a central UI
 - **Easy Configuration**: Add servers via UI or import from existing configs
 - **Connection Testing**: Verify server connectivity before use
@@ -78,18 +82,21 @@ Think of Claudiatron as your command center for Claude Code - bridging the gap b
 - **Batch Import/Export**: Support for bulk configuration import and export
 
 ### 📝 **CLAUDE.md Management**
+
 - **Built-in Editor**: Edit CLAUDE.md files directly within the app
 - **Live Preview**: See your markdown rendered in real-time
 - **Project Scanner**: Find all CLAUDE.md files in your projects
 - **Syntax Highlighting**: Full markdown support with syntax highlighting
 
 ### 🌐 **Internationalization**
+
 - **Multi-language Interface**: Support for Chinese and English interfaces
 - **Smart Language Detection**: Automatically detect and apply system language
 - **Dynamic Switching**: Seamlessly switch languages at runtime
 - **Complete Localization**: All interface elements are localized
 
 ### 🎨 **Modern Interface**
+
 - **Responsive Design**: Adapts to different screen sizes and resolutions
 - **Dark/Light Theme**: Supports automatic system theme switching
 - **Smooth Animations**: Fluid interface animations using Framer Motion
@@ -165,6 +172,7 @@ Release executables will be published soon.
 ### Development Environment
 
 1. **Node.js** (18.0.0 or later)
+
    ```bash
    # Install via nvm (recommended)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -173,12 +181,14 @@ Release executables will be published soon.
    ```
 
 2. **pnpm** (latest version)
+
    ```bash
    # Install pnpm
    npm install -g pnpm
    ```
 
 3. **Git**
+
    ```bash
    # Usually pre-installed, but if not:
    # Ubuntu/Debian: sudo apt install git
@@ -193,28 +203,32 @@ Release executables will be published soon.
 ### Build Steps
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/Haleclipse/Claudiatron.git
    cd Claudiatron
    ```
 
 2. **Install Dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Build the Application**
-   
+
    **For Development (with hot reload)**
+
    ```bash
    pnpm dev
    ```
-   
+
    **For Production Build**
+
    ```bash
    # Build the application
    pnpm build
-   
+
    # Platform-specific builds
    pnpm build:win     # Windows
    pnpm build:mac     # macOS
