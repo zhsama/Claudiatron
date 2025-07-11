@@ -307,17 +307,6 @@ export class WindowsWSLClaudeDetector extends PlatformClaudeDetector {
   }
 
   /**
-   * 检测是否包含乱码文本
-   */
-  private hasGarbledText(text: string): boolean {
-    // 检查是否包含过多的特殊字符或控制字符
-    const specialCharCount = (text.match(/[\u0000-\u001F\u007F-\u009F]/g) || []).length
-    const totalLength = text.length
-    
-    return totalLength > 0 && (specialCharCount / totalLength) > 0.1
-  }
-
-  /**
    * 检查是否为标题行
    */
   private isHeaderLine(line: string): boolean {

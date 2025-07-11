@@ -110,7 +110,7 @@ export async function getCommandPath(command: string): Promise<string | null> {
           env: {
             ...process.env,
             // 确保 PATH 包含常见的安装位置
-            PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin:${process.env.HOME}/.local/bin:${process.env.HOME}/.npm/bin:${process.env.HOME}/.fnm:${process.env.HOME}/.nvm/versions/node/*/bin:${process.env.HOME}/.yarn/bin:${process.env.HOME}/.config/yarn/global/node_modules/.bin:/opt/local/bin`
+            PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:${process.env.HOME}/.local/bin:${process.env.HOME}/.npm/bin:${process.env.HOME}/.fnm:${process.env.HOME}/.nvm/versions/node/*/bin:${process.env.HOME}/.yarn/bin:${process.env.HOME}/.config/yarn/global/node_modules/.bin:/opt/local/bin`
           }
         })
         if (result.exitCode === 0 && result.stdout.trim()) {

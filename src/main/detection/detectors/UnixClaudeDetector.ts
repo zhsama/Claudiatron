@@ -69,7 +69,7 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
       return packageManagerResult
     }
 
-    const commands = ['claude', 'claude-code']
+    const commands = ['claude']
 
     for (const cmd of commands) {
       try {
@@ -324,7 +324,7 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
   private async tryDirectExecution(): Promise<ClaudeDetectionResult> {
     console.log('Trying direct Claude execution...')
 
-    const commands = ['claude', 'claude-code']
+    const commands = ['claude']
 
     for (const cmd of commands) {
       try {
