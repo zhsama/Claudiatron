@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { api, type ClaudeInstallation } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { CheckCircle, Package, HardDrive, Settings } from 'lucide-react'
+import { CheckCircle, Settings } from 'lucide-react'
 
 interface ClaudeVersionSelectorProps {
   /**
@@ -148,18 +148,6 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
     }
   }
 
-  const getInstallationIcon = (installation: ClaudeInstallation) => {
-    switch (installation.installation_type) {
-      case 'Bundled':
-        return <Package className="h-4 w-4" />
-      case 'System':
-        return <HardDrive className="h-4 w-4" />
-      case 'Custom':
-        return <Settings className="h-4 w-4" />
-      default:
-        return <HardDrive className="h-4 w-4" />
-    }
-  }
 
   const getInstallationTypeColor = (installation: ClaudeInstallation) => {
     switch (installation.installation_type) {

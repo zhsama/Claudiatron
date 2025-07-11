@@ -1,6 +1,6 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain } from 'electron'
 import { promises as fs } from 'fs'
-import { join, dirname } from 'path'
+import { join } from 'path'
 import { homedir } from 'os'
 import { spawn } from 'child_process'
 import { claudeBinaryManager } from '../detection/ClaudeBinaryManagerAdapter'
@@ -267,7 +267,7 @@ export function setupMCPHandlers() {
       console.log('Main: mcp-add-json called with', { name, scope })
       try {
         // Parse the JSON config to validate it
-        const config = JSON.parse(jsonConfig)
+        JSON.parse(jsonConfig)
 
         const cmdArgs = ['mcp', 'add', '-s', scope, '--json', name, jsonConfig]
         const output = await executeClaudeMCPCommandLegacy(cmdArgs)
@@ -510,7 +510,7 @@ export function setupMCPHandlers() {
 /**
  * Create error suggestions based on error type
  */
-function createErrorSuggestions(errorType: MCPErrorType, errorMessage: string): string[] {
+function createErrorSuggestions(errorType: MCPErrorType): string[] {
   switch (errorType) {
     case MCPErrorType.CLAUDE_NOT_INSTALLED:
       return [
@@ -615,7 +615,7 @@ async function executeClaudeMCPCommand(args: string[]): Promise<MCPOperationResu
             error: {
               type: errorType,
               message: errorMessage,
-              suggestions: createErrorSuggestions(errorType, errorMessage),
+              suggestions: createErrorSuggestions(errorType),
               technical_details: `Command: ${args.join(' ')}\nExit code: ${code}\nStderr: ${stderr}`
             }
           })
@@ -628,7 +628,7 @@ async function executeClaudeMCPCommand(args: string[]): Promise<MCPOperationResu
           error: {
             type: MCPErrorType.COMMAND_FAILED,
             message: error.message,
-            suggestions: createErrorSuggestions(MCPErrorType.COMMAND_FAILED, error.message),
+            suggestions: createErrorSuggestions(MCPErrorType.COMMAND_FAILED),
             technical_details: `Command: ${args.join(' ')}\nError: ${error.message}`
           }
         })
@@ -644,7 +644,7 @@ async function executeClaudeMCPCommand(args: string[]): Promise<MCPOperationResu
         error: {
           type: errorType,
           message: errorMessage,
-          suggestions: createErrorSuggestions(errorType, errorMessage),
+          suggestions: createErrorSuggestions(errorType),
           technical_details: `Command: ${args.join(' ')}\nError: ${errorMessage}`
         }
       })

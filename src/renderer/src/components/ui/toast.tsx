@@ -54,6 +54,7 @@ export const Toast: React.FC<ToastProps> = ({
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [duration, onDismiss])
 
   const icons = {

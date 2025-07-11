@@ -73,7 +73,7 @@ export abstract class PlatformClaudeDetector implements ClaudeExecutor {
       this.version = this.parseVersion(result.stdout)
       return this.version
     } catch (error) {
-      throw new Error(`Failed to get Claude version: ${error.message}`)
+      throw new Error(`Failed to get Claude version: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 

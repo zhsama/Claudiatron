@@ -110,7 +110,7 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
           return result
         }
       } catch (error) {
-        console.warn(`Shell detection failed for ${cmd}:`, error.message)
+        console.warn(`Shell detection failed for ${cmd}:`, error instanceof Error ? error.message : String(error))
         continue
       }
     }
@@ -340,7 +340,7 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
           }
         }
       } catch (error) {
-        console.warn(`Direct execution failed for ${cmd}:`, error.message)
+        console.warn(`Direct execution failed for ${cmd}:`, error instanceof Error ? error.message : String(error))
         continue
       }
     }
@@ -379,7 +379,7 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
       const version = await getProgramVersion(path)
       return version !== null
     } catch (error) {
-      console.warn(`Failed to verify Claude at ${path}:`, error.message)
+      console.warn(`Failed to verify Claude at ${path}:`, error instanceof Error ? error.message : String(error))
       return false
     }
   }

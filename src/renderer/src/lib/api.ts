@@ -508,7 +508,7 @@ export const api = {
    * @param downloadUrl - The download URL for the agent file
    * @returns Promise resolving to the agent export data
    */
-  async fetchGitHubAgentContent(downloadUrl: string): Promise<AgentExport> {
+  async fetchGitHubAgentContent(_downloadUrl: string): Promise<AgentExport> {
     try {
       // TODO: Add fetchGitHubAgentContent to preload API
       throw new Error('fetchGitHubAgentContent not implemented in Electron version yet')
@@ -523,7 +523,7 @@ export const api = {
    * @param downloadUrl - The download URL for the agent file
    * @returns Promise resolving to the imported agent
    */
-  async importAgentFromGitHub(downloadUrl: string): Promise<Agent> {
+  async importAgentFromGitHub(_downloadUrl: string): Promise<Agent> {
     try {
       // TODO: Add importAgentFromGitHub to preload API
       throw new Error('importAgentFromGitHub not implemented in Electron version yet')
@@ -552,7 +552,7 @@ export const api = {
    * @param path - Optional path to open the session in
    * @returns Promise resolving when the session is opened
    */
-  async openNewSession(path?: string): Promise<string> {
+  async openNewSession(_path?: string): Promise<string> {
     try {
       // TODO: Add openNewSession to preload API
       throw new Error('openNewSession not implemented in Electron version yet')
@@ -1979,17 +1979,17 @@ export const listen = <T>(
   const windowApi = getWindowApi()
 
   // 解析事件名和runId
-  const [eventType, runId] = event.split(':')
+  const [_eventType, runId] = event.split(':')
 
   // 包装回调函数，将数据格式从 Electron 格式转换为原版 Tauri 格式
-  const wrappedCallback = (electronEvent: any, data: T) => {
+  const wrappedCallback = (_electronEvent: any, data: T) => {
     // 包装数据为原版 event.payload 格式
     callback({ payload: data })
   }
 
   if (runId) {
     // 监听特定runId的事件
-    const handler = (electronEvent: any, data: T) => {
+    const handler = (_electronEvent: any, data: T) => {
       callback({ payload: data })
     }
 

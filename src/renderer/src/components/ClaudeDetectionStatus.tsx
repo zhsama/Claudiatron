@@ -3,7 +3,6 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   CheckCircle,
   XCircle,
@@ -12,7 +11,6 @@ import {
   Info,
   ExternalLink,
   Terminal,
-  Settings
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -105,7 +103,7 @@ export const ClaudeDetectionStatus: React.FC<ClaudeDetectionStatusProps> = ({ cl
         executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
         error: {
           type: 'DETECTION_FAILED',
-          message: error.message || 'Failed to detect Claude'
+          message: (error instanceof Error ? error.message : String(error)) || 'Failed to detect Claude'
         }
       })
     } finally {

@@ -212,7 +212,7 @@ export class ProcessManager extends EventEmitter {
     // Create process handle
     const handle: ProcessHandle = {
       info: processInfo,
-      process: childProcess,
+      process: childProcess as unknown as ResultPromise<any>,
       liveOutput: [],
       isFinished: false
     }
@@ -220,7 +220,7 @@ export class ProcessManager extends EventEmitter {
     this.processes.set(runId, handle)
 
     // Set up output streaming
-    this.setupOutputStreaming(runId, childProcess)
+    this.setupOutputStreaming(runId, childProcess as unknown as ResultPromise<any>)
 
     // Handle process completion
     childProcess.then(

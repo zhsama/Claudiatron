@@ -426,7 +426,7 @@ function App() {
             />
           )
         }
-        break
+        return null
 
       default:
         return null

@@ -1,0 +1,232 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送 v* 标签时触发 (如: v1.0.0)
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      version:
+        description: 'Release version (如: v1.0.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: win
+          - os: macos-latest
+            platform: mac
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史用于生成 changelog
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build & Release for ${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 增加构建超时时间和优化选项
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        timeout-minutes: 30
+        run: |
+          echo "Building for ${{ matrix.platform }}..."
+          pnpm build:${{ matrix.platform }}
+
+  # 创建 GitHub Release
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREV_TAG"
+          
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          PREV_TAG="${{ steps.prev_tag.outputs.PREV_TAG }}"
+          
+          cat > release_notes.md << 'EOF'
+          ## 🚀 Claudiatron $VERSION
+          
+          ### 📦 下载 / Downloads
+          
+          选择适合您操作系统的版本：/ Choose the version for your operating system:
+          
+          | 操作系统 / OS | 文件 / File | 说明 / Description |
+          |---------------|-------------|-------------------|
+          | Windows | `Claudiatron-$VERSION.exe` | Windows 安装程序 / Windows installer |
+          | macOS | `Claudiatron-$VERSION.dmg` | macOS 磁盘映像 / macOS disk image |
+          | Linux | `Claudiatron-$VERSION.AppImage` | Linux 便携版 / Linux portable |
+          | Linux | `Claudiatron-$VERSION.deb` | Ubuntu/Debian 软件包 / Ubuntu/Debian package |
+          
+          ### 📋 更新内容 / What's New
+          
+          EOF
+          
+          # 生成更新日志
+          if [ -n "$PREV_TAG" ]; then
+            echo "**自 $PREV_TAG 以来的更改 / Changes since $PREV_TAG:**" >> release_notes.md
+            echo "" >> release_notes.md
+            
+            # 获取提交信息并按类型分类
+            git log $PREV_TAG..HEAD --pretty=format:"- %s" --no-merges | \
+            sed 's/^- //' | \
+            while IFS= read -r commit; do
+              case "$commit" in
+                *"feat:"*|*"✨"*)
+                  echo "### ✨ 新功能 / New Features" >> temp_features.md
+                  echo "- $commit" >> temp_features.md
+                  echo "" >> temp_features.md
+                  ;;
+                *"fix:"*|*"🐛"*)
+                  echo "### 🐛 Bug 修复 / Bug Fixes" >> temp_fixes.md
+                  echo "- $commit" >> temp_fixes.md
+                  echo "" >> temp_fixes.md
+                  ;;
+                *"docs:"*|*"📝"*)
+                  echo "### 📝 文档 / Documentation" >> temp_docs.md
+                  echo "- $commit" >> temp_docs.md
+                  echo "" >> temp_docs.md
+                  ;;
+                *"style:"*|*"🎨"*)
+                  echo "### 🎨 界面优化 / UI Improvements" >> temp_style.md
+                  echo "- $commit" >> temp_style.md
+                  echo "" >> temp_style.md
+                  ;;
+                *"refactor:"*|*"♻️"*)
+                  echo "### ♻️ 代码重构 / Refactoring" >> temp_refactor.md
+                  echo "- $commit" >> temp_refactor.md
+                  echo "" >> temp_refactor.md
+                  ;;
+                *"chore:"*|*"📦"*)
+                  echo "### 📦 构建优化 / Build & Dependencies" >> temp_chore.md
+                  echo "- $commit" >> temp_chore.md
+                  echo "" >> temp_chore.md
+                  ;;
+                *)
+                  echo "### 🔧 其他改进 / Other Improvements" >> temp_other.md
+                  echo "- $commit" >> temp_other.md
+                  echo "" >> temp_other.md
+                  ;;
+              esac
+            done
+            
+            # 合并分类的更新日志
+            for file in temp_features.md temp_fixes.md temp_style.md temp_refactor.md temp_docs.md temp_chore.md temp_other.md; do
+              if [ -f "$file" ]; then
+                cat "$file" >> release_notes.md
+                rm "$file"
+              fi
+            done
+          else
+            echo "🎉 **首次发布 / Initial Release**" >> release_notes.md
+            echo "" >> release_notes.md
+            echo "这是 Claudiatron 的首个正式版本，包含完整的功能特性。" >> release_notes.md
+            echo "This is the first official release of Claudiatron with complete features." >> release_notes.md
+            echo "" >> release_notes.md
+          fi
+          
+          cat >> release_notes.md << 'EOF'
+          
+          ### 🔧 系统要求 / System Requirements
+          
+          - **Windows**: Windows 10 1809+ / Windows Server 2019+
+          - **macOS**: macOS 10.15 Catalina+
+          - **Linux**: Ubuntu 18.04+ / 相似发行版
+          
+          ### 📋 安装说明 / Installation
+          
+          1. 从上方下载适合您系统的安装包 / Download the installer for your system
+          2. 运行安装程序 / Run the installer
+          3. 确保已安装 [Claude Code CLI](https://claude.ai/code) / Ensure Claude Code CLI is installed
+          4. 启动 Claudiatron 开始使用 / Launch Claudiatron to get started
+          
+          ### 🌟 主要功能 / Key Features
+          
+          - 🗂️ **项目管理** - 可视化 Claude Code 项目浏览和管理
+          - 🤖 **AI 代理系统** - 创建和管理自定义 AI 代理
+          - 📊 **使用统计** - 实时监控 API 使用情况和成本
+          - 🔌 **MCP 集成** - 管理模型上下文协议服务器
+          - 🌐 **国际化** - 完整的中英文界面支持
+          - ⚙️ **设置管理** - 直观的配置界面和环境变量管理
+          
+          ### 🐛 问题反馈 / Issue Reporting
+          
+          如遇到问题，请访问 [GitHub Issues](https://github.com/Haleclipse/Claudiatron/issues) 提交反馈。
+          
+          For issues, please visit [GitHub Issues](https://github.com/Haleclipse/Claudiatron/issues).
+          
+          ---
+          
+          **完整更新日志**: [View all changes](https://github.com/Haleclipse/Claudiatron/compare/$PREV_TAG...$VERSION)
+          EOF
+          
+          echo "Generated release notes:"
+          cat release_notes.md
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: "Claudiatron ${{ steps.version.outputs.VERSION }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.exe
+            dist/*.msi
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.snap
+            dist/*.zip
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

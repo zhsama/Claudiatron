@@ -119,6 +119,7 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
         document.removeEventListener('mouseup', handleMouseUp)
       }
     }
+    return undefined
   }, [isDragging, handleMouseMove, handleMouseUp])
 
   // Handle keyboard navigation

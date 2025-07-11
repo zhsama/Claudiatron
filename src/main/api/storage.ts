@@ -231,8 +231,6 @@ export function setupStorageHandlers() {
  * Get database information and statistics
  */
 async function getDatabaseInfo() {
-  const { agentService, agentRunService } = await import('../database/services')
-
   try {
     const dataSource = await databaseManager.getDataSource()
 

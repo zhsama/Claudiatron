@@ -1,5 +1,4 @@
 // Electron IPC API wrapper - replacement for Tauri invoke API
-import type { HooksConfiguration } from '@/types/hooks'
 
 /** Process type for tracking in ProcessRegistry */
 export type ProcessType =
@@ -132,7 +131,7 @@ export const api = {
   },
 
   // Event Listeners (placeholder)
-  onStreamOutput(callback: (event: any, data: any) => void): void {
+  onStreamOutput(_callback: (event: any, data: any) => void): void {
     console.log('API: onStreamOutput listener registered')
     // This will be implemented with proper Electron IPC events
   },

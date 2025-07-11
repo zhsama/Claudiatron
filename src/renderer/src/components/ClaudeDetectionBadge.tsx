@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { CheckCircle, XCircle, RefreshCw, AlertTriangle, Terminal, Info } from 'lucide-react'
+import { CheckCircle, XCircle, RefreshCw, Terminal, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { api } from '@/lib/api'
@@ -49,7 +49,7 @@ export const ClaudeDetectionBadge: React.FC<ClaudeDetectionBadgeProps> = ({ clas
         success: false,
         platform: process.platform || 'unknown',
         executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
-        error: { message: error.message || 'Detection failed' }
+        error: { message: (error instanceof Error ? error.message : String(error)) || 'Detection failed' }
       })
     } finally {
       setIsLoading(false)

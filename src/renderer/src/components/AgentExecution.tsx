@@ -802,7 +802,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                         <motion.div
                           key={virtualItem.key}
                           data-index={virtualItem.index}
-                          ref={(el) => el && rowVirtualizer.measureElement(el)}
+                          ref={(el) => { if (el) rowVirtualizer.measureElement(el) }}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.2 }}
@@ -937,7 +937,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({ agent, onBack, c
                       <motion.div
                         key={virtualItem.key}
                         data-index={virtualItem.index}
-                        ref={(el) => el && fullscreenRowVirtualizer.measureElement(el)}
+                        ref={(el) => { if (el) fullscreenRowVirtualizer.measureElement(el) }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}

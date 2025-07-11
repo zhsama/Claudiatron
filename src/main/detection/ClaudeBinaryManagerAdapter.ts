@@ -80,7 +80,7 @@ class ClaudeBinaryManagerAdapter {
     } catch (error) {
       return {
         is_installed: false,
-        output: error.message || 'Claude Code detection failed'
+        output: (error instanceof Error ? error.message : String(error)) || 'Claude Code detection failed'
       }
     }
   }
@@ -221,19 +221,6 @@ class ClaudeBinaryManagerAdapter {
     return this.cachedResult || claudeDetectionManager.getLastDetectionResult()
   }
 
-  /**
-   * 保存二进制路径到设置
-   */
-  private async saveBinaryPathToSettings(path: string): Promise<void> {
-    try {
-      const currentPath = await appSettingsService.getClaudeBinaryPath()
-      if (!currentPath) {
-        await appSettingsService.setClaudeBinaryPath(path)
-      }
-    } catch (error) {
-      console.warn('Failed to save binary path to settings:', error)
-    }
-  }
 
   /**
    * 根据检测方法获取来源描述

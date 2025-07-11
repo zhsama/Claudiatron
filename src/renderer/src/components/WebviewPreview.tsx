@@ -125,6 +125,7 @@ const WebviewPreviewComponent: React.FC<WebviewPreviewProps> = ({
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [currentUrl])
 
   const navigate = (url: string) => {

@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { useTranslation } from 'react-i18next'
 
 interface LanguageSelectorProps {
   className?: string
@@ -18,7 +17,6 @@ interface LanguageSelectorProps {
  */
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className }) => {
   const { currentLanguage, languages, changeLanguage } = useLanguage()
-  const { t } = useTranslation('common')
 
   const handleLanguageChange = (value: string) => {
     changeLanguage(value as 'en' | 'zh')

@@ -154,7 +154,7 @@ export const EnvVarInput: React.FC<EnvVarInputProps> = ({
             {filteredSuggestions.map((suggestion, index) => (
               <div
                 key={suggestion.key}
-                ref={(el) => (itemRefs.current[index] = el)}
+                ref={(el) => { itemRefs.current[index] = el }}
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={cn(
                   'relative flex cursor-pointer select-none items-center justify-between gap-3 rounded-sm px-2 py-1 text-sm outline-none transition-colors',

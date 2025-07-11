@@ -189,7 +189,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
       namespace: command.namespace || '',
       content: command.content,
       description: command.description || '',
-      allowedTools: command.allowed_tools,
+      allowedTools: command.allowed_tools || [],
       scope: command.scope as 'project' | 'user'
     })
     setEditDialogOpen(true)

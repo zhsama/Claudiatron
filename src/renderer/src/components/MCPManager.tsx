@@ -96,8 +96,7 @@ export const MCPManager: React.FC<MCPManagerProps> = ({ onBack, className }) => 
       setToast({
         message: t(
           'importExport.messages.importPartialSuccess',
-          { imported, failed },
-          { count: imported }
+          { count: imported, imported, failed }
         ),
         type: 'success'
       })
@@ -105,8 +104,7 @@ export const MCPManager: React.FC<MCPManagerProps> = ({ onBack, className }) => 
       setToast({
         message: t(
           'importExport.messages.importPartialSuccess',
-          { imported, failed },
-          { count: imported }
+          { count: imported, imported, failed }
         ),
         type: 'error'
       })
