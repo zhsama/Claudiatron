@@ -25,13 +25,10 @@ export async function loadShellEnvironment(): Promise<void> {
     // 使用登录 shell 来获取完整的环境变量
     // -l: 登录 shell，会加载完整的配置文件
     // -i: 交互式 shell，确保加载所有环境设置
-    const { stdout } = await execAsync(
-      `${shell} -l -i -c 'env'`,
-      {
-        timeout: 5000,
-        encoding: 'utf8'
-      }
-    )
+    const { stdout } = await execAsync(`${shell} -l -i -c 'env'`, {
+      timeout: 5000,
+      encoding: 'utf8'
+    })
 
     // 解析环境变量
     const envLines = stdout.trim().split('\n')

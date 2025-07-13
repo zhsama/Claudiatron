@@ -23,13 +23,15 @@ win:
       arch: [x64]
     - target: portable
       arch: [x64]
+    - target: zip
+      arch: [x64]
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  menuCategory: "Developer Tools"
+  menuCategory: 'Developer Tools'
   license: LICENSE
   oneClick: false
   allowToChangeInstallationDirectory: true
@@ -51,10 +53,8 @@ mac:
   target:
     - target: dmg
       arch: [x64, arm64]
-    - target: zip
-      arch: [x64, arm64]
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
   title: ${productName} ${version}
   window:
     width: 540

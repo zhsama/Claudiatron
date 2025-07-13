@@ -254,10 +254,6 @@ class ClaudeBinaryManagerAdapter {
    * 根据检测结果获取安装类型
    */
   private getInstallationType(result: ClaudeDetectionResult): 'Bundled' | 'System' | 'Custom' {
-    if (result.executionMethod === 'wsl') {
-      return 'System' // WSL 中的安装被视为系统安装
-    }
-
     if (result.claudePath?.includes('sidecar') || result.claudePath === 'claude-code') {
       return 'Bundled'
     }
@@ -275,10 +271,10 @@ class ClaudeBinaryManagerAdapter {
   private createCompatibleErrorMessage(result: ClaudeDetectionResult): string {
     const baseMessage = result.error?.message || 'Claude Code not found'
 
-    if (result.platform === 'win32' && result.error?.type === 'WSL_NOT_AVAILABLE') {
+    if (result.platform === 'win32' && result.error?.type === 'NOT_FOUND') {
       return (
-        'Claude Code not found. Please ensure WSL is installed and Claude Code is installed within WSL. ' +
-        'Install WSL: wsl --install, then install Claude Code in WSL: wsl -- npm install -g @anthropic-ai/claude-code'
+        'Claude Code not found. Please ensure Git for Windows is installed and Claude Code is available in Git Bash. ' +
+        'Install Git for Windows: https://git-scm.com/download/win, then install Claude Code: npm install -g @anthropic-ai/claude-code'
       )
     }
 

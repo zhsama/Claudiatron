@@ -4,7 +4,7 @@
 
 import { PlatformClaudeDetector } from './base/PlatformClaudeDetector'
 import { UnixClaudeDetector } from './detectors/UnixClaudeDetector'
-import { WindowsWSLClaudeDetector } from './detectors/WindowsWSLClaudeDetector'
+import { WindowsClaudeDetector } from './detectors/WindowsClaudeDetector'
 import type {
   ClaudeDetectionResult,
   ProcessResult,
@@ -32,8 +32,8 @@ export class ClaudeDetectionManager implements ClaudeExecutor {
         return new UnixClaudeDetector()
 
       case 'win32':
-        console.log('Creating Windows WSL Claude detector')
-        return new WindowsWSLClaudeDetector()
+        console.log('Creating Windows Claude detector')
+        return new WindowsClaudeDetector()
 
       default:
         throw new Error(`Unsupported platform: ${process.platform}`)
@@ -62,7 +62,7 @@ export class ClaudeDetectionManager implements ClaudeExecutor {
       const result: ClaudeDetectionResult = {
         success: false,
         platform: process.platform as 'darwin' | 'linux' | 'win32',
-        executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
+        executionMethod: 'native',
         error: {
           type: 'EXECUTION_FAILED',
           message:
@@ -150,12 +150,12 @@ export class ClaudeDetectionManager implements ClaudeExecutor {
    */
   getPlatformInfo(): {
     platform: string
-    executionMethod: 'native' | 'wsl'
+    executionMethod: 'native'
     detectorType: string
   } {
     const platform = process.platform
-    const executionMethod = platform === 'win32' ? 'wsl' : 'native'
-    const detectorType = platform === 'win32' ? 'WindowsWSLClaudeDetector' : 'UnixClaudeDetector'
+    const executionMethod = 'native'
+    const detectorType = platform === 'win32' ? 'WindowsClaudeDetector' : 'UnixClaudeDetector'
 
     return {
       platform,

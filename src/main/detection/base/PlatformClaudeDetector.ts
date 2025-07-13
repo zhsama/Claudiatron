@@ -159,7 +159,7 @@ export abstract class PlatformClaudeDetector implements ClaudeExecutor {
     return {
       success: false,
       platform: process.platform as 'darwin' | 'linux' | 'win32',
-      executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
+      executionMethod: 'native',
       error: {
         type: 'NOT_FOUND',
         message: 'Claude Code not found',
