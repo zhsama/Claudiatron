@@ -12,7 +12,7 @@ import { processManager } from '../process/ProcessManager'
  */
 async function getProjectPathFromSessions(projectDir: string): Promise<string | null> {
   try {
-    const files = await glob(join(projectDir, '*.jsonl'))
+    const files = await glob(join(projectDir, '*.jsonl').replace(/\\/g, '/'))
 
     for (const file of files) {
       try {
@@ -152,7 +152,7 @@ export function setupClaudeHandlers() {
 
             // Get sessions for this project
             const sessionsPattern = join(projectPath, '*.jsonl')
-            const sessionFiles = await glob(sessionsPattern)
+            const sessionFiles = await glob(sessionsPattern.replace(/\\/g, '/'))
             const sessions = sessionFiles
               .map((file) => basename(file, '.jsonl'))
               .sort()
@@ -182,7 +182,7 @@ export function setupClaudeHandlers() {
 
               // Try to at least get sessions and stats
               const sessionsPattern = join(projectPath, '*.jsonl')
-              const sessionFiles = await glob(sessionsPattern)
+              const sessionFiles = await glob(sessionsPattern.replace(/\\/g, '/'))
               const sessions = sessionFiles
                 .map((file) => basename(file, '.jsonl'))
                 .sort()
@@ -234,7 +234,8 @@ export function setupClaudeHandlers() {
       const actualProjectPath =
         (await getProjectPathFromSessions(projectPath)) || decodeProjectPath(projectId)
 
-      const sessionsPattern = join(projectPath, '*.jsonl')
+      // Convert Windows paths to POSIX for glob compatibility
+      const sessionsPattern = join(projectPath, '*.jsonl').replace(/\\/g, '/')
       const sessionFiles = await glob(sessionsPattern)
 
       const sessions: any[] = []
@@ -446,7 +447,7 @@ export function setupClaudeHandlers() {
     console.log('Main: find-claude-md-files called with', projectPath)
     try {
       const pattern = join(projectPath, '**/CLAUDE.md')
-      const files = await glob(pattern)
+      const files = await glob(pattern.replace(/\\/g, '/'))
 
       // Get file stats for each file
       const filesWithStats = await Promise.all(
@@ -690,7 +691,7 @@ export function setupClaudeHandlers() {
     try {
       // Use glob to search for files matching the query pattern
       const pattern = join(basePath, '**', `*${query}*`)
-      const files = await glob(pattern, {
+      const files = await glob(pattern.replace(/\\/g, '/'), {
         nodir: false, // Include directories
         dot: false // Exclude hidden files by default
       })

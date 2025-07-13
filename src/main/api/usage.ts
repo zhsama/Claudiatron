@@ -355,7 +355,7 @@ async function getUsageStats(
 
   // Find all JSONL files
   const pattern = join(claudeDir, '**', '*.jsonl')
-  const files = await glob(pattern)
+  const files = await glob(pattern.replace(/\\/g, '/'))
 
   for (const file of files) {
     try {
@@ -423,7 +423,7 @@ async function getSessionUsage(sessionId: string): Promise<UsageEntry[]> {
   try {
     // Find the session file
     const pattern = join(claudeDir, '**', `${sessionId}.jsonl`)
-    const files = await glob(pattern)
+    const files = await glob(pattern.replace(/\\/g, '/'))
 
     for (const file of files) {
       try {
