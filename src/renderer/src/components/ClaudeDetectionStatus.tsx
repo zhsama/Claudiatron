@@ -89,8 +89,8 @@ export const ClaudeDetectionStatus: React.FC<ClaudeDetectionStatusProps> = ({ cl
         const versionInfo = await api.checkClaudeVersion()
         setDetectionResult({
           success: versionInfo.is_installed,
-          platform: process.platform || 'unknown',
-          executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
+          platform: window.electron.process.platform || 'unknown',
+          executionMethod: window.electron.process.platform === 'win32' ? 'wsl' : 'native',
           version: versionInfo.version,
           detectionMethod: 'legacy'
         })
@@ -99,8 +99,8 @@ export const ClaudeDetectionStatus: React.FC<ClaudeDetectionStatusProps> = ({ cl
       console.error('Failed to load Claude detection status:', error)
       setDetectionResult({
         success: false,
-        platform: process.platform || 'unknown',
-        executionMethod: process.platform === 'win32' ? 'wsl' : 'native',
+        platform: window.electron.process.platform || 'unknown',
+        executionMethod: window.electron.process.platform === 'win32' ? 'wsl' : 'native',
         error: {
           type: 'DETECTION_FAILED',
           message:

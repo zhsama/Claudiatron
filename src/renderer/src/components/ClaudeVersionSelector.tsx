@@ -285,7 +285,7 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
                     npm install -g @anthropic-ai/claude-code
                   </code>
                 </li>
-                {process.platform === 'win32' && (
+                {window.electron.process.platform === 'win32' && (
                   <li>{t('general.claudeInstallation.installGuide.windowsNote')}</li>
                 )}
               </ul>
@@ -347,7 +347,7 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
                       npm install -g @anthropic-ai/claude-code
                     </code>
                   </li>
-                  {process.platform === 'win32' && (
+                  {window.electron.process.platform === 'win32' && (
                     <li>On Windows, install within WSL for best compatibility</li>
                   )}
                 </ul>

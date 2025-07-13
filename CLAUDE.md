@@ -181,3 +181,25 @@ ipcMain.handle('create-claude-session', async (_, projectPath) => { ... });
 - **不要在渲染进程中** 直接访问 Node.js API
 - **不要绕过 IPC** 进行跨进程通信
 - **不要在主进程中** 执行长时间运行的同步操作
+
+## 重要注意事项
+
+### 渲染进程中的平台检测
+
+**❌ 错误做法**: 在渲染进程中直接使用 `process.platform`
+```typescript
+// 这会导致 "process is not defined" 错误
+if (process.platform === 'win32') { ... }
+```
+
+**✅ 正确做法**: 使用 electron-toolkit 暴露的安全接口
+```typescript
+// 使用预加载脚本暴露的平台信息
+if (window.electron.process.platform === 'win32') { ... }
+```
+
+### Windows 路径解码
+
+**问题**: Windows 项目路径编码格式 `C--Users-Name-Project` 需要特殊处理
+
+**解决方案**: 在路径解码函数中检测 Windows 盘符模式并正确转换为 `C:\Users\Name\Project`
