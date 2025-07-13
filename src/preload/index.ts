@@ -18,8 +18,8 @@ const api = {
   // Claude Code Execution
   executeClaudeCode: (projectPath: string, message: string, model?: string) =>
     ipcRenderer.invoke('execute-claude-code', { projectPath, message, model }),
-  continueClaudeCode: (projectPath: string, message: string) =>
-    ipcRenderer.invoke('continue-claude-code', { projectPath, message }),
+  continueClaudeCode: (projectPath: string, message: string, model?: string) =>
+    ipcRenderer.invoke('continue-claude-code', { projectPath, message, model }),
   cancelClaudeExecution: (runId: number) => ipcRenderer.invoke('cancel-claude-execution', runId),
 
   // File Operations
@@ -185,6 +185,8 @@ const api = {
     ipcRenderer.invoke('load-agent-session-history', { sessionId }),
   listRunningClaudeSessions: () => ipcRenderer.invoke('list-running-claude-sessions'),
   listRunningSessions: () => ipcRenderer.invoke('list-running-sessions'),
+  updateSessionId: (runId: number, sessionId: string) => 
+    ipcRenderer.invoke('update-session-id', { runId, sessionId }),
   getClaudeSessionOutput: (sessionId: string) =>
     ipcRenderer.invoke('get-claude-session-output', { sessionId }),
   resumeClaudeCode: (projectPath: string, sessionId: string, prompt: string, model: string) =>
@@ -219,6 +221,24 @@ const api = {
   },
   onAgentCancelled: (callback: (event: any, data: any) => void) => {
     ipcRenderer.on('agent-cancelled', callback)
+  },
+
+  // Claude 事件监听器
+  onClaudeOutput: (callback: (event: any, data: any) => void) => {
+    const wrappedCallback = (event: any, data: any) => {
+      console.log(
+        '[Preload] Received claude-output event:',
+        data?.length ? `data length: ${data.length}` : data
+      )
+      callback(event, data)
+    }
+    ipcRenderer.on('claude-output', wrappedCallback)
+  },
+  onClaudeError: (callback: (event: any, data: any) => void) => {
+    ipcRenderer.on('claude-error', callback)
+  },
+  onClaudeComplete: (callback: (event: any, data: any) => void) => {
+    ipcRenderer.on('claude-complete', callback)
   },
 
   // 动态事件监听器 - 支持特定事件名称

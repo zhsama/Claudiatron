@@ -340,13 +340,16 @@ export function setupClaudeHandlers() {
     try {
       const binaryPath = await claudeBinaryManager.findClaudeBinary()
 
-      const args = ['--project', projectPath]
+      const args: string[] = []
+      if (message) {
+        args.push('-p', message)
+      }
       if (model) {
         args.push('--model', model)
       }
-      if (message) {
-        args.push('--message', message)
-      }
+      args.push('--output-format', 'stream-json')
+      args.push('--verbose')
+      args.push('--dangerously-skip-permissions')
 
       // Register the process with the process manager
       const runId = await processManager.registerAgentProcess(
@@ -370,15 +373,21 @@ export function setupClaudeHandlers() {
     }
   })
 
-  ipcMain.handle('continue-claude-code', async (_, { projectPath, message }) => {
-    console.log('Main: continue-claude-code called with', { projectPath, message })
+  ipcMain.handle('continue-claude-code', async (_, { projectPath, message, model }) => {
+    console.log('Main: continue-claude-code called with', { projectPath, message, model })
     try {
       const binaryPath = await claudeBinaryManager.findClaudeBinary()
 
-      const args = ['--project', projectPath, '--continue']
+      const args: string[] = ['-c'] // Continue flag
       if (message) {
-        args.push('--message', message)
+        args.push('-p', message)
       }
+      if (model) {
+        args.push('--model', model)
+      }
+      args.push('--output-format', 'stream-json')
+      args.push('--verbose')
+      args.push('--dangerously-skip-permissions')
 
       const runId = await processManager.registerAgentProcess(
         0,
@@ -396,6 +405,45 @@ export function setupClaudeHandlers() {
       console.error('Error continuing Claude Code:', error)
       return {
         success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
+  })
+
+  ipcMain.handle('resume-claude-code', async (_, { projectPath, sessionId, prompt, model }) => {
+    console.log('Main: resume-claude-code called with', { projectPath, sessionId, prompt, model })
+    try {
+      const binaryPath = await claudeBinaryManager.findClaudeBinary()
+
+      const args: string[] = ['--resume', sessionId]
+      if (prompt) {
+        args.push('-p', prompt)
+      }
+      if (model) {
+        args.push('--model', model)
+      }
+      args.push('--output-format', 'stream-json')
+      args.push('--verbose')
+      args.push('--dangerously-skip-permissions')
+
+      // Register the process with the process manager
+      const runId = await processManager.registerAgentProcess(
+        0, // Not an agent run, use 0
+        'Claude Code Resume',
+        projectPath,
+        prompt || 'Resume session',
+        model || 'default',
+        binaryPath,
+        args,
+        { cwd: projectPath }
+      )
+
+      return { success: true, runId, message: 'Claude Code session resumed' }
+    } catch (error) {
+      console.error('Error resuming Claude Code:', error)
+      return {
+        success: false,
+        runId: undefined,
         message: error instanceof Error ? error.message : 'Unknown error'
       }
     }
@@ -579,6 +627,13 @@ export function setupClaudeHandlers() {
       console.error('Error listing running Claude sessions:', error)
       return []
     }
+  })
+
+  // Update session ID for a running process
+  ipcMain.handle('update-session-id', async (_, { runId, sessionId }) => {
+    console.log('Main: update-session-id called with', { runId, sessionId })
+    processManager.updateSessionId(runId, sessionId)
+    return { success: true }
   })
 
   ipcMain.handle('list-running-sessions', async () => {

@@ -1073,7 +1073,7 @@ export const api = {
   /**
    * Executes a new interactive Claude Code session with streaming output
    */
-  async executeClaudeCode(projectPath: string, prompt: string, model: string): Promise<void> {
+  async executeClaudeCode(projectPath: string, prompt: string, model: string): Promise<{ success: boolean; runId?: number; message: string }> {
     const api = getWindowApi()
     return api.executeClaudeCode(projectPath, prompt, model)
   },
@@ -1094,7 +1094,7 @@ export const api = {
     sessionId: string,
     prompt: string,
     model: string
-  ): Promise<void> {
+  ): Promise<{ success: boolean; runId?: number; message: string }> {
     const api = getWindowApi()
     return api.resumeClaudeCode(projectPath, sessionId, prompt, model)
   },
@@ -1106,6 +1106,16 @@ export const api = {
   async cancelClaudeExecution(sessionId?: string): Promise<void> {
     const api = getWindowApi()
     return api.cancelClaudeExecution(sessionId)
+  },
+
+  /**
+   * Updates the session ID for a running process
+   * @param runId - The run ID of the process
+   * @param sessionId - The session ID to set
+   */
+  async updateSessionId(runId: number, sessionId: string): Promise<{ success: boolean }> {
+    const api = getWindowApi()
+    return api.updateSessionId(runId, sessionId)
   },
 
   /**
@@ -2020,6 +2030,23 @@ export const listen = <T>(
   if (event.startsWith('agent-cancelled') && windowApi.onAgentCancelled) {
     windowApi.onAgentCancelled(wrappedCallback)
     return () => windowApi.removeAllListeners('agent-cancelled')
+  }
+
+  // Claude 事件处理
+  if (event.startsWith('claude-output') && windowApi.onClaudeOutput) {
+    console.log('[API] Setting up claude-output listener')
+    windowApi.onClaudeOutput(wrappedCallback)
+    return () => windowApi.removeAllListeners('claude-output')
+  }
+  if (event.startsWith('claude-error') && windowApi.onClaudeError) {
+    console.log('[API] Setting up claude-error listener')
+    windowApi.onClaudeError(wrappedCallback)
+    return () => windowApi.removeAllListeners('claude-error')
+  }
+  if (event.startsWith('claude-complete') && windowApi.onClaudeComplete) {
+    console.log('[API] Setting up claude-complete listener')
+    windowApi.onClaudeComplete(wrappedCallback)
+    return () => windowApi.removeAllListeners('claude-complete')
   }
 
   console.log(`Listen for event: ${event} - event system not fully implemented`)

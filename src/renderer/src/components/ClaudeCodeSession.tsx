@@ -97,6 +97,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     projectId: string
   } | null>(null)
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null)
+  const [currentRunId, setCurrentRunId] = useState<number | null>(null)
   const [showTimeline, setShowTimeline] = useState(false)
   const [timelineVersion, setTimelineVersion] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
@@ -230,7 +231,26 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const rowVirtualizer = useVirtualizer({
     count: displayableMessages.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 150, // Estimate, will be dynamically measured
+    estimateSize: (index) => {
+      // Better size estimation based on message type
+      const message = displayableMessages[index]
+      if (!message) return 150
+      
+      // Different estimates for different message types
+      if (message.type === 'system' && message.subtype === 'init') {
+        return 100 // System init messages are usually shorter
+      } else if (message.type === 'user') {
+        return 120 // User messages are typically shorter
+      } else if (message.type === 'assistant') {
+        // Assistant messages can vary greatly
+        const hasToolUse = message.message?.content?.some((c: any) => c.type === 'tool_use')
+        return hasToolUse ? 300 : 200
+      } else if (message.type === 'result') {
+        return 150 // Result messages are medium sized
+      }
+      
+      return 150 // Default fallback
+    },
     overscan: 5
   })
 
@@ -276,12 +296,23 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       const targetIndex = Math.min(displayableMessages.length - 1, rowVirtualizer.options.count - 1)
       if (targetIndex >= 0 && targetIndex < displayableMessages.length) {
         try {
+          // Use auto behavior instead of smooth for better compatibility with virtualizer
           rowVirtualizer.scrollToIndex(targetIndex, {
             align: 'end',
-            behavior: 'smooth'
+            behavior: 'auto'
           })
         } catch (error) {
           console.warn('Failed to scroll to index:', targetIndex, error)
+          // Fallback to native scroll if virtualizer fails
+          const scrollElement = parentRef.current
+          if (scrollElement) {
+            setTimeout(() => {
+              scrollElement.scrollTo({
+                top: scrollElement.scrollHeight,
+                behavior: 'auto'
+              })
+            }, 100)
+          }
         }
       }
     }
@@ -378,8 +409,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     // Mark as listening
     isListeningRef.current = true
 
-    // Set up session-specific listeners
-    const outputUnlisten = await listen<string>(`claude-output:${sessionId}`, async (event) => {
+    // Set up session-specific listeners - 使用通用的 claude-* 事件
+    const outputUnlisten = await listen<string>('claude-output', async (event) => {
       try {
         console.log('[ClaudeCodeSession] Received claude-output on reconnect:', event.payload)
 
@@ -396,7 +427,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       }
     })
 
-    const errorUnlisten = await listen<string>(`claude-error:${sessionId}`, (event) => {
+    const errorUnlisten = await listen<string>('claude-error', (event) => {
+      console.log('[ClaudeCodeSession] Received claude-error on reconnect:', event.payload)
       console.error('Claude error:', event.payload)
       if (isMountedRef.current) {
         setError(event.payload)
@@ -404,7 +436,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     })
 
     const completeUnlisten = await listen<boolean>(
-      `claude-complete:${sessionId}`,
+      'claude-complete',
       async (event) => {
         console.log('[ClaudeCodeSession] Received claude-complete on reconnect:', event.payload)
         if (isMountedRef.current) {
@@ -502,38 +534,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
         let currentSessionId: string | null = claudeSessionId || effectiveSession?.id || null
 
-        // Helper to attach session-specific listeners **once we are sure**
-        const attachSessionSpecificListeners = async (sid: string) => {
-          console.log('[ClaudeCodeSession] Attaching session-specific listeners for', sid)
+        // Note: 由于 ProcessManager 发送的是通用 claude-* 事件，我们直接使用通用监听器
 
-          const specificOutputUnlisten = await listen<string>(`claude-output:${sid}`, (evt) => {
-            handleStreamMessage(evt.payload)
-          })
-
-          const specificErrorUnlisten = await listen<string>(`claude-error:${sid}`, (evt) => {
-            console.error('Claude error (scoped):', evt.payload)
-            setError(evt.payload)
-          })
-
-          const specificCompleteUnlisten = await listen<boolean>(
-            `claude-complete:${sid}`,
-            (evt) => {
-              console.log('[ClaudeCodeSession] Received claude-complete (scoped):', evt.payload)
-              processComplete(evt.payload)
-            }
-          )
-
-          // Replace existing unlisten refs with these new ones (after cleaning up)
-          unlistenRefs.current.forEach((u) => u())
-          unlistenRefs.current = [
-            specificOutputUnlisten,
-            specificErrorUnlisten,
-            specificCompleteUnlisten
-          ]
-        }
-
-        // Generic listeners (catch-all)
+        // Generic listeners (catch-all) - 监听 ProcessManager 发送的通用 claude-* 事件
         const genericOutputUnlisten = await listen<string>('claude-output', async (event) => {
+          console.log('[ClaudeCodeSession] Received claude-output event:', event.payload)
           handleStreamMessage(event.payload)
 
           // Attempt to extract session_id on the fly (for the very first init)
@@ -548,14 +553,21 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 currentSessionId = msg.session_id
                 setClaudeSessionId(msg.session_id)
 
+                // Update the backend with the session ID
+                if (currentRunId) {
+                  console.log('[ClaudeCodeSession] Updating backend with sessionId:', msg.session_id, 'for runId:', currentRunId)
+                  try {
+                    await api.updateSessionId(currentRunId, msg.session_id)
+                  } catch (err) {
+                    console.error('Failed to update session ID:', err)
+                  }
+                }
+
                 // If we haven't extracted session info before, do it now
                 if (!extractedSessionInfo) {
                   const projectId = projectPath.replace(/[^a-zA-Z0-9]/g, '-')
                   setExtractedSessionInfo({ sessionId: msg.session_id, projectId })
                 }
-
-                // Switch to session-specific listeners
-                await attachSessionSpecificListeners(msg.session_id)
               }
             }
           } catch {
@@ -621,6 +633,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         }
 
         const genericErrorUnlisten = await listen<string>('claude-error', (evt) => {
+          console.log('[ClaudeCodeSession] Received claude-error event:', evt.payload)
           console.error('Claude error:', evt.payload)
           setError(evt.payload)
         })
@@ -658,11 +671,19 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         // Execute the appropriate command
         if (effectiveSession && !isFirstPrompt) {
           console.log('[ClaudeCodeSession] Resuming session:', effectiveSession.id)
-          await api.resumeClaudeCode(projectPath, effectiveSession.id, prompt, model)
+          const result = await api.resumeClaudeCode(projectPath, effectiveSession.id, prompt, model)
+          if (result.success && result.runId) {
+            setCurrentRunId(result.runId)
+            console.log('[ClaudeCodeSession] Resume session started with runId:', result.runId)
+          }
         } else {
           console.log('[ClaudeCodeSession] Starting new session')
           setIsFirstPrompt(false)
-          await api.executeClaudeCode(projectPath, prompt, model)
+          const result = await api.executeClaudeCode(projectPath, prompt, model)
+          if (result.success && result.runId) {
+            setCurrentRunId(result.runId)
+            console.log('[ClaudeCodeSession] New session started with runId:', result.runId)
+          }
         }
       }
     } catch (err) {
@@ -1200,7 +1221,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4"
+                className="fixed bottom-16 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4"
               >
                 <div className="bg-background/95 backdrop-blur-md border rounded-lg shadow-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
@@ -1276,24 +1297,19 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                   onClick={() => {
                     // Use virtualizer to scroll to the first item
                     if (displayableMessages.length > 0) {
-                      // Scroll to top of the container
-                      parentRef.current?.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                      })
-
-                      // After smooth scroll completes, trigger a small scroll to ensure rendering
-                      setTimeout(() => {
-                        if (parentRef.current) {
-                          // Scroll down 1px then back to 0 to trigger virtualizer update
-                          parentRef.current.scrollTop = 1
-                          requestAnimationFrame(() => {
-                            if (parentRef.current) {
-                              parentRef.current.scrollTop = 0
-                            }
-                          })
-                        }
-                      }, 500) // Wait for smooth scroll to complete
+                      try {
+                        rowVirtualizer.scrollToIndex(0, {
+                          align: 'start',
+                          behavior: 'auto'
+                        })
+                      } catch (error) {
+                        console.warn('Failed to scroll to top with virtualizer:', error)
+                        // Fallback to native scroll
+                        parentRef.current?.scrollTo({
+                          top: 0,
+                          behavior: 'auto'
+                        })
+                      }
                     }
                   }}
                   className="px-3 py-2 hover:bg-accent rounded-none"
@@ -1308,13 +1324,22 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                   onClick={() => {
                     // Use virtualizer to scroll to the last item
                     if (displayableMessages.length > 0) {
-                      // Scroll to bottom of the container
-                      const scrollElement = parentRef.current
-                      if (scrollElement) {
-                        scrollElement.scrollTo({
-                          top: scrollElement.scrollHeight,
-                          behavior: 'smooth'
+                      try {
+                        const lastIndex = displayableMessages.length - 1
+                        rowVirtualizer.scrollToIndex(lastIndex, {
+                          align: 'end',
+                          behavior: 'auto'
                         })
+                      } catch (error) {
+                        console.warn('Failed to scroll to bottom with virtualizer:', error)
+                        // Fallback to native scroll
+                        const scrollElement = parentRef.current
+                        if (scrollElement) {
+                          scrollElement.scrollTo({
+                            top: scrollElement.scrollHeight,
+                            behavior: 'auto'
+                          })
+                        }
                       }
                     }
                   }}

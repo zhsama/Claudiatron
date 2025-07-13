@@ -299,6 +299,7 @@ export class ProcessManager extends EventEmitter {
           output.length
         )
         this.appendLiveOutput(runId, output)
+        
         this.sendAgentEvent(runId, 'agent-output', output)
       })
 
@@ -412,7 +413,82 @@ export class ProcessManager extends EventEmitter {
     if (!handle) return
 
     handle.isFinished = true
-    this.emit('processError', { runId, error })
+
+    // 增强错误信息，特别是对 ENOENT 错误
+    let enhancedError = error
+
+    if (error.message.includes('ENOENT') || (error as any).code === 'ENOENT') {
+      const originalError = error as any
+      const command = originalError.path || 'unknown command'
+
+      console.error('[ProcessManager] Process error for runId:', runId, error)
+      console.error('[ProcessManager] Command not found:', command)
+      console.error('[ProcessManager] Current PATH:', process.env.PATH)
+      console.error('[ProcessManager] Current working directory:', process.cwd())
+
+      // 创建增强的错误消息
+      const errorDetails = [
+        `Command not found: ${command}`,
+        `Error code: ${originalError.code}`,
+        `Working directory: ${handle.info.projectPath}`,
+        '',
+        'Debugging information:',
+        `- Full PATH: ${process.env.PATH}`,
+        `- Command arguments: ${originalError.spawnargs?.join(' ') || 'N/A'}`,
+        '',
+        'Possible solutions:',
+        '1. Ensure Claude Code is installed: npm install -g @anthropic-ai/claude-code',
+        '2. Check if Claude is in PATH: which claude',
+        '3. Try restarting the application to refresh environment variables',
+        '4. Check Claude binary detection in application settings'
+      ].join('\n')
+
+      enhancedError = new Error(errorDetails)
+      enhancedError.name = 'CommandNotFoundError'
+      ;(enhancedError as any).originalError = error
+      ;(enhancedError as any).code = originalError.code
+      ;(enhancedError as any).command = command
+    } else if (
+      error.message.includes('unknown option') ||
+      error.message.includes('invalid argument') ||
+      (error as any).stderr?.includes('unknown option')
+    ) {
+      // 处理命令行参数错误
+      const originalError = error as any
+      const stderr = originalError.stderr || ''
+      const stdout = originalError.stdout || ''
+
+      console.error('[ProcessManager] Command line argument error for runId:', runId, error)
+      console.error('[ProcessManager] Command:', originalError.command)
+      console.error('[ProcessManager] stderr:', stderr)
+      console.error('[ProcessManager] stdout:', stdout)
+
+      const errorDetails = [
+        'Command line argument error:',
+        stderr || error.message,
+        '',
+        'Command executed:',
+        originalError.command || 'N/A',
+        '',
+        'This usually indicates an issue with the command arguments.',
+        'The application may need to be updated to match the current Claude Code version.',
+        '',
+        'Debugging information:',
+        `- Working directory: ${handle.info.projectPath}`,
+        `- Exit code: ${originalError.exitCode || 'N/A'}`,
+        `- Full error: ${error.message}`
+      ].join('\n')
+
+      enhancedError = new Error(errorDetails)
+      enhancedError.name = 'CommandArgumentError'
+      ;(enhancedError as any).originalError = error
+      ;(enhancedError as any).stderr = stderr
+      ;(enhancedError as any).stdout = stdout
+    } else {
+      console.error('[ProcessManager] Process error for runId:', runId, error)
+    }
+
+    this.emit('processError', { runId, error: enhancedError })
     this.sendAgentEvent(runId, 'agent-complete', false)
   }
 
@@ -469,7 +545,7 @@ export class ProcessManager extends EventEmitter {
       this.processes.delete(runId)
 
       this.emit('processKilled', info)
-      this.sendAgentEvent(runId, 'agent-cancelled', true)
+      this.sendAgentEvent(runId, 'agent-complete', false)
 
       return true
     } catch (error) {
@@ -601,15 +677,70 @@ export class ProcessManager extends EventEmitter {
   /**
    * Send agent event with runId isolation
    */
+
   private sendAgentEvent(runId: number, eventType: string, data: any): void {
-    console.log(
-      `[ProcessManager] Sending event: ${eventType}:${runId}`,
-      data?.length ? `data length: ${data.length}` : data
-    )
-    if (this.browserWindow && !this.browserWindow.isDestroyed()) {
-      this.browserWindow.webContents.send(`${eventType}:${runId}`, data)
+    const handle = this.processes.get(runId)
+    
+    // 调试信息
+    console.log(`[ProcessManager] sendAgentEvent debug:`, {
+      runId,
+      eventType,
+      agentId: handle?.info.agentId,
+      agentName: handle?.info.agentName,
+      sessionId: handle?.info.sessionId,
+      isClaudeCode: handle?.info.agentId === 0 && handle?.info.agentName?.includes('Claude Code')
+    })
+    
+    // 针对 Claude Code 会话，使用会话特定的事件名称
+    if (handle?.info.agentId === 0 && handle?.info.agentName?.includes('Claude Code')) {
+      const claudeEventType = eventType.replace('agent-', 'claude-')
+      
+      if (handle.info.sessionId) {
+        // 有 sessionId，发送会话特定事件
+        const sessionSpecificEvent = `${claudeEventType}:${handle.info.sessionId}`
+        console.log(
+          `[ProcessManager] Sending session-specific Claude event: ${sessionSpecificEvent}`,
+          data?.length ? `data length: ${data.length}` : data
+        )
+        if (this.browserWindow && !this.browserWindow.isDestroyed()) {
+          this.browserWindow.webContents.send(sessionSpecificEvent, data)
+        }
+      } else {
+        // 暂时没有 sessionId，发送通用事件作为临时方案
+        console.log(
+          `[ProcessManager] Sending temporary generic Claude event: ${claudeEventType} (no sessionId yet)`,
+          data?.length ? `data length: ${data.length}` : data
+        )
+        if (this.browserWindow && !this.browserWindow.isDestroyed()) {
+          this.browserWindow.webContents.send(claudeEventType, data)
+        }
+      }
     } else {
-      console.log(`[ProcessManager] Browser window not available for event: ${eventType}:${runId}`)
+      // 普通代理事件，使用带 runId 的格式
+      console.log(
+        `[ProcessManager] Sending event: ${eventType}:${runId}`,
+        data?.length ? `data length: ${data.length}` : data
+      )
+      if (this.browserWindow && !this.browserWindow.isDestroyed()) {
+        this.browserWindow.webContents.send(`${eventType}:${runId}`, data)
+      }
+    }
+    
+    if (!this.browserWindow || this.browserWindow.isDestroyed()) {
+      console.log(`[ProcessManager] Browser window not available for event`)
+    }
+  }
+
+  /**
+   * Update the sessionId for a running process
+   */
+  updateSessionId(runId: number, sessionId: string): void {
+    const handle = this.processes.get(runId)
+    if (handle) {
+      handle.info.sessionId = sessionId
+      console.log(`[ProcessManager] Updated sessionId for runId ${runId}: ${sessionId}`)
+    } else {
+      console.warn(`[ProcessManager] Cannot update sessionId: runId ${runId} not found`)
     }
   }
 
