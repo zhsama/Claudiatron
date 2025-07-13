@@ -129,26 +129,77 @@ export async function executeGitBashCommand(
   command: string,
   options: ExecutionOptions = {}
 ): Promise<ProcessResult> {
-  const { timeout = 30000, cwd = process.cwd(), env = {} } = options
+  const { timeout = 10000, cwd = process.cwd(), env = {} } = options
 
   // 构造 Git Bash 命令
-  // 使用 -l (login shell) 确保加载完整环境
-  // 使用 -i (interactive) 确保加载 .bashrc 等配置
-  const bashCommand = `"${bashPath}" -l -i -c "${command.replace(/"/g, '\\"')}"`
+  // 使用 -c 执行命令，不加载完整环境以提高速度
+  const bashCommand = `"${bashPath}" -c "${command.replace(/"/g, '\\"')}"`
 
   console.log(`Executing Git Bash command: ${command}`)
-  console.log(`Full command: ${bashCommand}`)
+
+  // 创建清洁的 Windows 路径环境，排除 WSL 路径
+  const windowsOnlyPath = createWindowsOnlyPath()
 
   return executeCommand(bashCommand, {
     timeout,
     cwd,
     env: {
-      ...process.env,
       ...env,
-      // 确保使用正确的 PATH
-      PATH: `${process.env.PATH};C:\\Program Files\\Git\\bin;C:\\Program Files\\Git\\usr\\bin`
+      // 使用清洁的 PATH，排除 WSL 路径
+      PATH: windowsOnlyPath,
+      // 确保使用正确的用户目录
+      USERPROFILE: process.env.USERPROFILE || '',
+      HOME: process.env.USERPROFILE || ''
     }
   })
+}
+
+/**
+ * 创建只包含 Windows 路径的 PATH 环境变量
+ */
+function createWindowsOnlyPath(): string {
+  const originalPath = process.env.PATH || ''
+  const pathParts = originalPath.split(';')
+
+  // 过滤掉 WSL 相关路径
+  const windowsPaths = pathParts.filter((path) => {
+    if (!path) return false
+
+    // 排除 WSL 相关路径
+    const lowerPath = path.toLowerCase()
+    if (
+      lowerPath.includes('wsl') ||
+      lowerPath.includes('/mnt/') ||
+      lowerPath.includes('\\wsl\\') ||
+      lowerPath.includes('\\ubuntu\\') ||
+      lowerPath.includes('\\debian\\')
+    ) {
+      return false
+    }
+
+    // 排除明显的 Linux 路径格式
+    if (
+      path.startsWith('/usr/') ||
+      path.startsWith('/bin/') ||
+      path.startsWith('/sbin/') ||
+      path.startsWith('/tmp/') ||
+      path.startsWith('/run/')
+    ) {
+      return false
+    }
+
+    return true
+  })
+
+  // 添加必要的 Git 路径
+  const gitPaths = [
+    'C:\\Program Files\\Git\\bin',
+    'C:\\Program Files\\Git\\usr\\bin',
+    'C:\\Program Files\\Git\\mingw64\\bin'
+  ]
+
+  // 合并路径，确保 Git 路径在前面
+  return [...gitPaths, ...windowsPaths].join(';')
 }
 
 /**
@@ -156,7 +207,7 @@ export async function executeGitBashCommand(
  */
 export async function checkCommandInGitBash(bashPath: string, command: string): Promise<boolean> {
   try {
-    const result = await executeGitBashCommand(bashPath, `command -v ${command}`, { timeout: 5000 })
+    const result = await executeGitBashCommand(bashPath, `command -v ${command}`, { timeout: 3000 })
     return result.exitCode === 0 && result.stdout.trim().length > 0
   } catch {
     return false
@@ -171,17 +222,16 @@ export async function getCommandPathInGitBash(
   command: string
 ): Promise<string | null> {
   try {
-    // 使用更严格的检测方式，确保命令在 Git Bash 的原生 PATH 中
+    // 使用简单快速的检测方式
     const result = await executeGitBashCommand(
       bashPath,
-      `command -v ${command} 2>/dev/null || type -P ${command} 2>/dev/null || true`,
-      { timeout: 5000 }
+      `command -v ${command} 2>/dev/null || true`,
+      { timeout: 3000 }
     )
 
     if (result.exitCode === 0 && result.stdout.trim()) {
       const claudePath = result.stdout.trim().split('\n')[0]
 
-      // 接受所有检测到的路径，让上层决定如何处理
       if (claudePath) {
         return claudePath
       }

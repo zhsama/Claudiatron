@@ -91,7 +91,7 @@ export async function getCommandPath(command: string): Promise<string | null> {
   // 需要通过登录 shell 来获取正确的 PATH
   if (process.platform === 'darwin' || process.platform === 'linux') {
     // 获取用户的默认 shell
-    const shell = process.env.SHELL || '/bin/bash'
+    const shell = process.env.SHELL || '/bin/zsh'
 
     // 使用登录 shell 来执行 which 命令
     // -l 参数确保加载完整的用户环境（包括 .bashrc/.zshrc 等）
