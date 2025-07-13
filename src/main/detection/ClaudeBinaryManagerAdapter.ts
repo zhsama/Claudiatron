@@ -226,12 +226,22 @@ class ClaudeBinaryManagerAdapter {
    * 根据检测方法获取来源描述
    */
   private getSourceFromDetectionMethod(method: string, result?: ClaudeDetectionResult): string {
+    // 如果有环境信息，优先显示环境描述
+    if (result?.metadata?.environmentDescription) {
+      return result.metadata.environmentDescription
+    }
+
     // 如果是 fnm 安装，显示更详细的信息
     if (result?.metadata?.isFromFnm) {
       const nodeVersion = result.metadata.nodeVersion
         ? ` (Node v${result.metadata.nodeVersion})`
         : ''
       return `fnm${nodeVersion}`
+    }
+
+    // 如果有包管理器信息
+    if (result?.metadata?.packageManager) {
+      return `${result.metadata.packageManager} package manager`
     }
 
     switch (method) {
@@ -241,6 +251,8 @@ class ClaudeBinaryManagerAdapter {
         return 'System PATH'
       case 'direct':
         return 'Direct execution'
+      case 'git-bash':
+        return 'Git Bash environment'
       case 'wsl':
         return 'WSL environment'
       case 'user':

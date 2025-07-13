@@ -171,10 +171,20 @@ export async function getCommandPathInGitBash(
   command: string
 ): Promise<string | null> {
   try {
-    const result = await executeGitBashCommand(bashPath, `which ${command}`, { timeout: 5000 })
+    // 使用更严格的检测方式，确保命令在 Git Bash 的原生 PATH 中
+    const result = await executeGitBashCommand(
+      bashPath,
+      `command -v ${command} 2>/dev/null || type -P ${command} 2>/dev/null || true`,
+      { timeout: 5000 }
+    )
 
     if (result.exitCode === 0 && result.stdout.trim()) {
-      return result.stdout.trim().split('\n')[0]
+      const claudePath = result.stdout.trim().split('\n')[0]
+
+      // 接受所有检测到的路径，让上层决定如何处理
+      if (claudePath) {
+        return claudePath
+      }
     }
   } catch {
     // 忽略错误

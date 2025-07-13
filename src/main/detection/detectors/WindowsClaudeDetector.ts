@@ -84,8 +84,11 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
     // 直接检测 claude 命令
     const claudePath = await getCommandPathInGitBash(this.gitBashInfo.bashPath, 'claude')
     if (claudePath && (await this.verify(claudePath))) {
+      const environment = this.identifyClaudeEnvironment(claudePath)
       const version = await this.getClaudeVersion(claudePath)
-      console.log(`Found Claude via Git Bash: ${claudePath}, version: ${version}`)
+      console.log(
+        `Found Claude via Git Bash: ${claudePath} (${environment.description}), version: ${version}`
+      )
 
       return {
         success: true,
@@ -93,7 +96,11 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
         executionMethod: 'native',
         claudePath,
         version: version || 'unknown',
-        detectionMethod: 'git-bash'
+        detectionMethod: 'git-bash',
+        metadata: {
+          environment: environment.type,
+          environmentDescription: environment.description
+        }
       }
     }
 
@@ -136,19 +143,19 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
 
         switch (manager.name) {
           case 'fnm':
-            claudeCmd = `fnm exec --using=default -- which claude 2>/dev/null || true`
+            claudeCmd = `fnm exec --using=default -- command -v claude 2>/dev/null || true`
             break
           case 'nvm':
-            claudeCmd = `source ~/.bashrc && nvm use default && which claude 2>/dev/null || true`
+            claudeCmd = `source ~/.bashrc && nvm use default && command -v claude 2>/dev/null || true`
             break
           case 'volta':
-            claudeCmd = `volta run which claude 2>/dev/null || true`
+            claudeCmd = `volta run command -v claude 2>/dev/null || true`
             break
           case 'nodenv':
-            claudeCmd = `nodenv exec which claude 2>/dev/null || true`
+            claudeCmd = `nodenv exec command -v claude 2>/dev/null || true`
             break
           case 'npm':
-            claudeCmd = `which claude 2>/dev/null || true`
+            claudeCmd = `command -v claude 2>/dev/null || true`
             break
           default:
             continue
@@ -160,7 +167,11 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
 
         if (result.exitCode === 0 && result.stdout.trim()) {
           const claudePath = result.stdout.trim()
-          console.log(`Found Claude via ${manager.name}: ${claudePath}`)
+          const environment = this.identifyClaudeEnvironment(claudePath)
+
+          console.log(
+            `Found Claude via ${manager.name}: ${claudePath} (${environment.description})`
+          )
 
           // 获取版本
           const version = await this.getClaudeVersion(claudePath)
@@ -173,7 +184,9 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
             version: version || 'unknown',
             detectionMethod: manager.name,
             metadata: {
-              packageManager: manager.name
+              packageManager: manager.name,
+              environment: environment.type,
+              environmentDescription: environment.description
             }
           }
         }
@@ -365,6 +378,48 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
       },
       suggestions: this.generateInstallationSuggestions()
     }
+  }
+
+  /**
+   * 识别 Claude 路径的环境类型
+   */
+  private identifyClaudeEnvironment(path: string): {
+    type: 'git-bash' | 'wsl' | 'native' | 'unknown'
+    description: string
+  } {
+    if (!path) return { type: 'unknown', description: 'Unknown' }
+
+    // WSL 环境
+    if (path.includes('/mnt/') || path.includes('/wsl/') || path.toLowerCase().includes('wsl')) {
+      return { type: 'wsl', description: 'WSL Environment' }
+    }
+
+    // Unix 路径（可能是 WSL 或其他 Unix 子系统）
+    if (path.startsWith('/usr/') || path.startsWith('/bin/') || path.startsWith('/home/')) {
+      return { type: 'wsl', description: 'Unix-like Environment (possibly WSL)' }
+    }
+
+    // Windows 原生路径
+    if (path.includes('\\') || path.includes('Program Files') || path.includes('AppData')) {
+      return { type: 'native', description: 'Windows Native' }
+    }
+
+    // Node.js 模块路径（通常是原生）
+    if (
+      path.includes('node_modules') ||
+      path.includes('npm') ||
+      path.includes('.cmd') ||
+      path.includes('.exe')
+    ) {
+      return { type: 'native', description: 'Node.js Package (Native)' }
+    }
+
+    // Git Bash 转换的路径
+    if (/^\/[a-zA-Z]\//.test(path)) {
+      return { type: 'git-bash', description: 'Git Bash Environment' }
+    }
+
+    return { type: 'unknown', description: 'Unknown Environment' }
   }
 
   /**

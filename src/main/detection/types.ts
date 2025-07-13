@@ -22,6 +22,8 @@ export interface ClaudeDetectionResult {
     isFromFnm?: boolean
     nodeVersion?: string
     packageManager?: string
+    environment?: 'git-bash' | 'wsl' | 'native' | 'unknown' // 执行环境类型
+    environmentDescription?: string // 环境描述
   }
 }
 
