@@ -40,9 +40,19 @@ async function getProjectPathFromSessions(projectDir: string): Promise<string | 
  * This is a fallback when we can't get the path from JSONL files
  */
 function decodeProjectPath(encoded: string): string {
-  // Simple decode - replace hyphens with slashes
+  // Simple decode - replace hyphens with appropriate path separator
   // Note: This isn't reversible when paths contain hyphens
-  return encoded.replace(/-/g, '/')
+
+  // Check if this looks like a Windows path with drive letter (e.g., "C--Users-...")
+  if (encoded.match(/^[A-Z]--/)) {
+    // Windows path with drive letter
+    const driveLetter = encoded.charAt(0)
+    const pathPart = encoded.substring(3) // Skip "X--"
+    return `${driveLetter}:\\${pathPart.replace(/-/g, '\\')}`
+  } else {
+    // Unix-like path (macOS/Linux)
+    return encoded.replace(/-/g, '/')
+  }
 }
 
 /**

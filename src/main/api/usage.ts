@@ -711,7 +711,16 @@ function calculateStats(entries: UsageEntry[], sessionIds: Set<string>): UsageSt
  * Decode project path from encoded format
  */
 function decodeProjectPath(encoded: string): string {
-  return encoded.replace(/-/g, '/')
+  // Check if this looks like a Windows path with drive letter (e.g., "C--Users-...")
+  if (encoded.match(/^[A-Z]--/)) {
+    // Windows path with drive letter
+    const driveLetter = encoded.charAt(0)
+    const pathPart = encoded.substring(3) // Skip "X--"
+    return `${driveLetter}:\\${pathPart.replace(/-/g, '\\')}`
+  } else {
+    // Unix-like path (macOS/Linux)
+    return encoded.replace(/-/g, '/')
+  }
 }
 
 /**
