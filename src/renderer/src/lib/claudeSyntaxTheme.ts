@@ -1,10 +1,10 @@
 /**
  * Claude-themed syntax highlighting theme
- * Features orange, purple, and violet colors to match Claude's aesthetic
+ * Adapts to light/dark theme using CSS custom properties
  */
 export const claudeSyntaxTheme: any = {
   'code[class*="language-"]': {
-    color: '#e3e8f0',
+    color: 'var(--color-foreground)',
     background: 'transparent',
     textShadow: 'none',
     fontFamily: 'var(--font-mono)',
@@ -24,7 +24,7 @@ export const claudeSyntaxTheme: any = {
     hyphens: 'none'
   },
   'pre[class*="language-"]': {
-    color: '#e3e8f0',
+    color: 'var(--color-foreground)',
     background: 'transparent',
     textShadow: 'none',
     fontFamily: 'var(--font-mono)',
@@ -47,100 +47,102 @@ export const claudeSyntaxTheme: any = {
     overflow: 'auto'
   },
   ':not(pre) > code[class*="language-"]': {
-    background: 'rgba(139, 92, 246, 0.1)',
+    color: 'var(--color-foreground)', 
     padding: '0.1em 0.3em',
-    borderRadius: '0.3em',
+    borderRadius: 'var(--radius-sm)',
     whiteSpace: 'normal'
   },
   comment: {
-    color: '#6b7280',
+    color: 'var(--color-muted-foreground)',
     fontStyle: 'italic'
   },
   prolog: {
-    color: '#6b7280'
+    color: 'var(--color-muted-foreground)'
   },
   doctype: {
-    color: '#6b7280'
+    color: 'var(--color-muted-foreground)'
   },
   cdata: {
-    color: '#6b7280'
+    color: 'var(--color-muted-foreground)'
   },
   punctuation: {
-    color: '#9ca3af'
+    color: 'var(--color-muted-foreground)'
   },
   namespace: {
     opacity: '0.7'
   },
   property: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   tag: {
-    color: '#8b5cf6' // Violet
+    color: 'oklch(0.55 0.15 270)' // Adaptive violet
   },
   boolean: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   number: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   constant: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   symbol: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   deleted: {
-    color: '#ef4444'
+    color: 'var(--color-destructive)',
+    backgroundColor: 'var(--color-destructive)/5'
   },
   selector: {
-    color: '#a78bfa' // Light Purple
+    color: 'oklch(0.65 0.12 280)' // Adaptive light purple
   },
   'attr-name': {
-    color: '#a78bfa' // Light Purple
+    color: 'oklch(0.65 0.12 280)' // Adaptive light purple
   },
   string: {
-    color: '#10b981' // Emerald Green
+    color: 'oklch(0.55 0.15 150)' // Adaptive emerald green
   },
   char: {
-    color: '#10b981' // Emerald Green
+    color: 'oklch(0.55 0.15 150)' // Adaptive emerald green
   },
   builtin: {
-    color: '#8b5cf6' // Violet
+    color: 'oklch(0.55 0.15 270)' // Adaptive violet
   },
   url: {
-    color: '#10b981' // Emerald Green
+    color: 'oklch(0.55 0.15 150)' // Adaptive emerald green
   },
   inserted: {
-    color: '#10b981' // Emerald Green
+    color: 'oklch(0.55 0.15 150)', // Adaptive emerald green
+    backgroundColor: 'oklch(0.55 0.15 150)/5'
   },
   entity: {
-    color: '#a78bfa', // Light Purple
+    color: 'oklch(0.65 0.12 280)', // Adaptive light purple
     cursor: 'help'
   },
   atrule: {
-    color: '#c084fc' // Light Violet
+    color: 'oklch(0.70 0.12 290)' // Adaptive light violet
   },
   'attr-value': {
-    color: '#10b981' // Emerald Green
+    color: 'oklch(0.55 0.15 150)' // Adaptive emerald green
   },
   keyword: {
-    color: '#c084fc' // Light Violet
+    color: 'oklch(0.70 0.12 290)' // Adaptive light violet
   },
   function: {
-    color: '#818cf8' // Indigo
+    color: 'oklch(0.60 0.15 240)' // Adaptive indigo
   },
   'class-name': {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   regex: {
-    color: '#06b6d4' // Cyan
+    color: 'oklch(0.55 0.15 200)' // Adaptive cyan
   },
   important: {
-    color: '#f59e0b', // Amber/Orange
+    color: 'oklch(0.63 0.15 45)', // Adaptive amber/orange
     fontWeight: 'bold'
   },
   variable: {
-    color: '#a78bfa' // Light Purple
+    color: 'oklch(0.65 0.12 280)' // Adaptive light purple
   },
   bold: {
     fontWeight: 'bold'
@@ -149,27 +151,27 @@ export const claudeSyntaxTheme: any = {
     fontStyle: 'italic'
   },
   operator: {
-    color: '#9ca3af'
+    color: 'var(--color-muted-foreground)'
   },
   script: {
-    color: '#e3e8f0'
+    color: 'var(--color-foreground)'
   },
   parameter: {
-    color: '#fbbf24' // Yellow
+    color: 'oklch(0.70 0.15 70)' // Adaptive yellow
   },
   method: {
-    color: '#818cf8' // Indigo
+    color: 'oklch(0.60 0.15 240)' // Adaptive indigo
   },
   field: {
-    color: '#f59e0b' // Amber/Orange
+    color: 'oklch(0.63 0.15 45)' // Adaptive amber/orange
   },
   annotation: {
-    color: '#6b7280'
+    color: 'var(--color-muted-foreground)'
   },
   type: {
-    color: '#a78bfa' // Light Purple
+    color: 'oklch(0.65 0.12 280)' // Adaptive light purple
   },
   module: {
-    color: '#8b5cf6' // Violet
+    color: 'oklch(0.55 0.15 270)' // Adaptive violet
   }
 }

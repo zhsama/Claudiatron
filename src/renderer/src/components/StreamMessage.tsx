@@ -726,7 +726,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({
           className={cn(
             isError
               ? 'border-destructive/20 bg-destructive/5'
-              : 'border-green-500/20 bg-green-500/5',
+              : 'border-green-600/20 bg-green-600/5',
             className
           )}
         >
@@ -735,7 +735,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({
               {isError ? (
                 <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
               ) : (
-                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
               )}
               <div className="flex-1 space-y-2">
                 <h4 className="font-semibold text-sm">
