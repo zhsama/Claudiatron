@@ -265,7 +265,31 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
    * 检查用户配置的 Claude 路径
    */
   private async checkUserConfig(): Promise<ClaudeDetectionResult> {
-    // TODO: 实现用户配置检查，从应用设置中读取用户自定义的 Claude 路径
+    try {
+      const { appSettingsService } = await import('../../database/services')
+      const customPath = await appSettingsService.getClaudeBinaryPath()
+
+      if (customPath && (await this.verify(customPath))) {
+        const version = await this.getClaudeVersion(customPath)
+        console.log(`Found Claude via user config: ${customPath}, version: ${version}`)
+
+        return {
+          success: true,
+          platform: 'win32',
+          executionMethod: 'native',
+          claudePath: customPath,
+          version: version || 'unknown',
+          detectionMethod: 'user',
+          metadata: {
+            environment: 'native',
+            environmentDescription: 'User configured'
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to check user config:', error)
+    }
+
     return {
       success: false,
       platform: 'win32',
@@ -384,20 +408,10 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
    * 识别 Claude 路径的环境类型
    */
   private identifyClaudeEnvironment(path: string): {
-    type: 'git-bash' | 'wsl' | 'native' | 'unknown'
+    type: 'git-bash' | 'native' | 'unknown'
     description: string
   } {
     if (!path) return { type: 'unknown', description: 'Unknown' }
-
-    // WSL 环境
-    if (path.includes('/mnt/') || path.includes('/wsl/') || path.toLowerCase().includes('wsl')) {
-      return { type: 'wsl', description: 'WSL Environment' }
-    }
-
-    // Unix 路径（可能是 WSL 或其他 Unix 子系统）
-    if (path.startsWith('/usr/') || path.startsWith('/bin/') || path.startsWith('/home/')) {
-      return { type: 'wsl', description: 'Unix-like Environment (possibly WSL)' }
-    }
 
     // Windows 原生路径
     if (path.includes('\\') || path.includes('Program Files') || path.includes('AppData')) {
@@ -416,6 +430,11 @@ export class WindowsClaudeDetector extends PlatformClaudeDetector {
 
     // Git Bash 转换的路径
     if (/^\/[a-zA-Z]\//.test(path)) {
+      return { type: 'git-bash', description: 'Git Bash Environment' }
+    }
+
+    // Unix 风格路径（在 Git Bash 中）
+    if (path.startsWith('/usr/') || path.startsWith('/bin/') || path.startsWith('/home/')) {
       return { type: 'git-bash', description: 'Git Bash Environment' }
     }
 

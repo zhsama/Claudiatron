@@ -192,10 +192,11 @@ export abstract class PlatformClaudeDetector implements ClaudeExecutor {
 
       case 'win32':
         return [
-          '安装 WSL: wsl --install',
-          '重启电脑以完成 WSL 安装',
-          '在 WSL 中安装 Node.js 和 npm',
-          '在 WSL 中安装 Claude Code: npm install -g @anthropic-ai/claude-code'
+          'Install Git for Windows from https://git-scm.com/download/win',
+          'Install Node.js from https://nodejs.org/',
+          'Install Claude Code: npm install -g @anthropic-ai/claude-code',
+          'Restart the application after installation',
+          'Verify installation: open Git Bash and run "claude --version"'
         ]
 
       default:
@@ -211,11 +212,7 @@ export abstract class PlatformClaudeDetector implements ClaudeExecutor {
 
     switch (process.platform) {
       case 'win32':
-        return [
-          ...common,
-          'https://docs.microsoft.com/en-us/windows/wsl/install',
-          'https://ubuntu.com/wsl'
-        ]
+        return [...common, 'https://git-scm.com/download/win', 'https://nodejs.org/']
       default:
         return common
     }

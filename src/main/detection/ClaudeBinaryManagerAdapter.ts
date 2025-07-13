@@ -253,8 +253,6 @@ class ClaudeBinaryManagerAdapter {
         return 'Direct execution'
       case 'git-bash':
         return 'Git Bash environment'
-      case 'wsl':
-        return 'WSL environment'
       case 'user':
         return 'User configured'
       default:

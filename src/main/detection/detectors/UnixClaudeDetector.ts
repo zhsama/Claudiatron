@@ -362,8 +362,31 @@ export class UnixClaudeDetector extends PlatformClaudeDetector {
    * 检查用户配置的 Claude 路径
    */
   private async checkUserConfig(): Promise<ClaudeDetectionResult> {
-    // TODO: 实现用户配置检查，从应用设置中读取用户自定义的 Claude 路径
-    // 这将在后续的用户界面集成中实现
+    try {
+      const { appSettingsService } = await import('../../database/services')
+      const customPath = await appSettingsService.getClaudeBinaryPath()
+
+      if (customPath && (await this.verify(customPath))) {
+        const version = await getProgramVersion(customPath)
+        console.log(`Found Claude via user config: ${customPath}, version: ${version}`)
+
+        return {
+          success: true,
+          platform: process.platform as 'darwin' | 'linux',
+          executionMethod: 'native',
+          claudePath: customPath,
+          version: version || 'unknown',
+          detectionMethod: 'user',
+          metadata: {
+            environment: 'native',
+            environmentDescription: 'User configured'
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to check user config:', error)
+    }
+
     return {
       success: false,
       platform: process.platform as 'darwin' | 'linux',
