@@ -3,6 +3,12 @@ import { promises as fs } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
 import { glob } from 'glob'
+import { Result } from '@praha/byethrow'
+
+// Import new enhanced services
+import { EnhancedUsageService } from '../services/usage/enhancedUsageService'
+import type { CostMode } from '../services/pricing/types'
+import { CostMode as CostModeValues } from '../services/pricing/types'
 
 /**
  * Usage tracking and statistics
@@ -131,11 +137,191 @@ const PRICING = {
   }
 }
 
+// Global enhanced usage service instance
+let enhancedUsageService: EnhancedUsageService | null = null
+
+function getEnhancedUsageService(): EnhancedUsageService {
+  if (!enhancedUsageService) {
+    enhancedUsageService = new EnhancedUsageService()
+  }
+  return enhancedUsageService
+}
+
+/**
+ * Convert enhanced stats format to legacy format for backward compatibility
+ * 将增强统计格式转换为旧格式以保持向后兼容性
+ */
+function convertToLegacyFormat(
+  enhancedStats: any,
+  _startDate?: string,
+  _endDate?: string,
+  projectPath?: string
+): UsageStats {
+  // Group session blocks by date for daily stats
+  const dateMap = new Map<string, DailyUsage>()
+  const projectMap = new Map<string, ProjectUsage>()
+
+  for (const block of enhancedStats.sessionBlocks) {
+    const date = block.startTime.toISOString().split('T')[0]
+
+    if (!dateMap.has(date)) {
+      dateMap.set(date, {
+        date,
+        total_cost: 0,
+        total_tokens: 0,
+        models_used: []
+      })
+    }
+
+    const dayStats = dateMap.get(date)!
+    dayStats.total_cost += block.costUSD
+    dayStats.total_tokens += (Object.values(block.tokenCounts) as number[]).reduce(
+      (a: number, b: number) => a + b,
+      0
+    )
+
+    for (const model of block.models) {
+      if (!dayStats.models_used.includes(model)) {
+        dayStats.models_used.push(model)
+      }
+    }
+  }
+
+  // Convert model breakdown
+  const modelUsageArray: ModelUsage[] = enhancedStats.modelBreakdown.map((model: any) => ({
+    model: model.model,
+    total_cost: model.totalCost,
+    total_tokens: model.totalTokens,
+    input_tokens: model.inputTokens,
+    output_tokens: model.outputTokens,
+    cache_creation_tokens: model.cacheCreationInputTokens,
+    cache_read_tokens: model.cacheReadInputTokens,
+    session_count: 1, // Simplified for now
+    request_count: model.requestCount
+  }))
+
+  // Create project stats if filtering by project
+  if (projectPath) {
+    projectMap.set(projectPath, {
+      project_path: projectPath,
+      project_name: getProjectName(projectPath),
+      total_cost: enhancedStats.totalCost,
+      total_tokens: enhancedStats.totalTokens,
+      session_count: enhancedStats.sessionBlocks.length,
+      request_count: enhancedStats.sessionBlocks.reduce(
+        (acc: number, block: any) => acc + block.entries.length,
+        0
+      ),
+      last_used: new Date().toISOString()
+    })
+  }
+
+  return {
+    total_cost: enhancedStats.totalCost,
+    total_tokens: enhancedStats.totalTokens,
+    total_input_tokens: enhancedStats.inputTokens,
+    total_output_tokens: enhancedStats.outputTokens,
+    total_cache_creation_tokens: enhancedStats.cacheCreationTokens,
+    total_cache_read_tokens: enhancedStats.cacheReadTokens,
+    total_sessions: enhancedStats.sessionBlocks.length,
+    total_requests: enhancedStats.sessionBlocks.reduce(
+      (acc: number, block: any) => acc + block.entries.length,
+      0
+    ),
+    by_model: modelUsageArray,
+    by_date: Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date)),
+    by_project: Array.from(projectMap.values())
+  }
+}
+
 /**
  * Usage Statistics IPC handlers
  */
 export function setupUsageHandlers() {
-  // Get usage statistics for a date range
+  // Enhanced usage statistics with new calculation (v2 API)
+  ipcMain.handle(
+    'get-usage-stats-v2',
+    async (
+      _,
+      params?: {
+        startDate?: string
+        endDate?: string
+        projectPath?: string
+        mode?: CostMode
+      }
+    ) => {
+      const { startDate, endDate, projectPath, mode = CostModeValues.AUTO } = params || {}
+      try {
+        const service = getEnhancedUsageService()
+        const result = await service.getEnhancedUsageStats(startDate, endDate, projectPath, mode)
+
+        if (Result.isSuccess(result)) {
+          return Result.unwrap(result)
+        } else {
+          console.error('Error getting enhanced usage stats:', result.error)
+          return {
+            totalCost: 0,
+            totalTokens: 0,
+            inputTokens: 0,
+            outputTokens: 0,
+            cacheCreationTokens: 0,
+            cacheReadTokens: 0,
+            modelBreakdown: [],
+            sessionBlocks: []
+          }
+        }
+      } catch (error) {
+        console.error('Error getting enhanced usage stats:', error)
+        return {
+          totalCost: 0,
+          totalTokens: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          cacheCreationTokens: 0,
+          cacheReadTokens: 0,
+          modelBreakdown: [],
+          sessionBlocks: []
+        }
+      }
+    }
+  )
+
+  // Enhanced session usage (v2 API)
+  ipcMain.handle(
+    'get-session-usage-v2',
+    async (_, sessionId: string, mode: CostMode = CostModeValues.AUTO) => {
+      console.log('Main: get-session-usage-v2 called with', sessionId, mode)
+      try {
+        const service = getEnhancedUsageService()
+        const result = await service.getEnhancedSessionUsage(sessionId, mode)
+
+        if (Result.isSuccess(result)) {
+          return Result.unwrap(result)
+        } else {
+          console.error('Error getting enhanced session usage:', result.error)
+          return []
+        }
+      } catch (error) {
+        console.error('Error getting enhanced session usage:', error)
+        return []
+      }
+    }
+  )
+
+  // Clear pricing cache
+  ipcMain.handle('clear-pricing-cache', async (_) => {
+    console.log('Main: clear-pricing-cache called')
+    try {
+      const service = getEnhancedUsageService()
+      service.clearCache()
+      return 'Pricing cache cleared successfully'
+    } catch (error) {
+      console.error('Error clearing pricing cache:', error)
+      throw new Error('Failed to clear pricing cache')
+    }
+  })
+
+  // Get usage statistics for a date range (Enhanced - using new calculation)
   ipcMain.handle(
     'get-usage-stats',
     async (
@@ -149,51 +335,92 @@ export function setupUsageHandlers() {
       const { startDate, endDate, projectPath } = params || {}
       console.log('Main: get-usage-stats called with', { startDate, endDate, projectPath })
       try {
-        return await getUsageStats(startDate, endDate, projectPath)
+        const service = getEnhancedUsageService()
+        const result = await service.getEnhancedUsageStats(
+          startDate,
+          endDate,
+          projectPath,
+          CostModeValues.AUTO
+        )
+
+        if (Result.isSuccess(result)) {
+          const enhancedStats = Result.unwrap(result)
+          // Convert enhanced stats to legacy format for backward compatibility
+          return convertToLegacyFormat(enhancedStats, startDate, endDate, projectPath)
+        } else {
+          console.error('Error getting enhanced usage stats:', result.error)
+          return createEmptyStats()
+        }
       } catch (error) {
         console.error('Error getting usage stats:', error)
-        return {
-          total_cost: 0,
-          total_tokens: 0,
-          total_input_tokens: 0,
-          total_output_tokens: 0,
-          total_cache_creation_tokens: 0,
-          total_cache_read_tokens: 0,
-          total_sessions: 0,
-          total_requests: 0,
-          by_model: [],
-          by_date: [],
-          by_project: []
-        }
+        return createEmptyStats()
       }
     }
   )
 
-  // Get usage entries for a specific session
+  // Get usage entries for a specific session (Enhanced)
   ipcMain.handle('get-session-usage', async (_, sessionId: string) => {
     console.log('Main: get-session-usage called with', sessionId)
     try {
-      return await getSessionUsage(sessionId)
+      const service = getEnhancedUsageService()
+      const result = await service.getEnhancedSessionUsage(sessionId, CostModeValues.AUTO)
+
+      if (Result.isSuccess(result)) {
+        const enhancedEntries = Result.unwrap(result)
+        // Convert enhanced entries to legacy format
+        return enhancedEntries.map((entry) => ({
+          timestamp: entry.timestamp.toISOString(),
+          model: entry.model,
+          input_tokens: entry.usage.inputTokens,
+          output_tokens: entry.usage.outputTokens,
+          cache_creation_tokens: entry.usage.cacheCreationInputTokens,
+          cache_read_tokens: entry.usage.cacheReadInputTokens,
+          cost: entry.costUSD,
+          session_id: entry.sessionId,
+          project_path: entry.projectPath,
+          request_id: entry.requestId,
+          message_type: 'assistant'
+        }))
+      } else {
+        console.error('Error getting enhanced session usage:', result.error)
+        return []
+      }
     } catch (error) {
       console.error('Error getting session usage:', error)
       return []
     }
   })
 
-  // Get daily usage statistics
+  // Get daily usage statistics (Enhanced)
   ipcMain.handle('get-daily-usage', async (_, date?: string) => {
     console.log('Main: get-daily-usage called with', date)
     try {
       const targetDate = date || new Date().toISOString().split('T')[0]
-      const stats = await getUsageStats(targetDate, targetDate)
-      return (
-        stats.by_date[0] || {
+      const service = getEnhancedUsageService()
+      const result = await service.getEnhancedUsageStats(
+        targetDate,
+        targetDate,
+        undefined,
+        CostModeValues.AUTO
+      )
+
+      if (Result.isSuccess(result)) {
+        const enhancedStats = Result.unwrap(result)
+        return {
+          date: targetDate,
+          total_cost: enhancedStats.totalCost,
+          total_tokens: enhancedStats.totalTokens,
+          models_used: enhancedStats.modelBreakdown.map((m) => m.model)
+        }
+      } else {
+        console.error('Error getting enhanced daily usage:', result.error)
+        return {
           date: targetDate,
           total_cost: 0,
           total_tokens: 0,
           models_used: []
         }
-      )
+      }
     } catch (error) {
       console.error('Error getting daily usage:', error)
       return {
@@ -205,46 +432,71 @@ export function setupUsageHandlers() {
     }
   })
 
-  // Get monthly usage statistics
+  // Get monthly usage statistics (Enhanced)
   ipcMain.handle('get-monthly-usage', async (_, year: number, month: number) => {
     console.log('Main: get-monthly-usage called with', year, month)
     try {
       const startDate = `${year}-${month.toString().padStart(2, '0')}-01`
       const endDate = new Date(year, month, 0).toISOString().split('T')[0] // Last day of month
-      return await getUsageStats(startDate, endDate)
+      const service = getEnhancedUsageService()
+      const result = await service.getEnhancedUsageStats(
+        startDate,
+        endDate,
+        undefined,
+        CostModeValues.AUTO
+      )
+
+      if (Result.isSuccess(result)) {
+        const enhancedStats = Result.unwrap(result)
+        return convertToLegacyFormat(enhancedStats, startDate, endDate)
+      } else {
+        console.error('Error getting enhanced monthly usage:', result.error)
+        return createEmptyStats()
+      }
     } catch (error) {
       console.error('Error getting monthly usage:', error)
-      return {
-        total_cost: 0,
-        total_tokens: 0,
-        total_input_tokens: 0,
-        total_output_tokens: 0,
-        total_cache_creation_tokens: 0,
-        total_cache_read_tokens: 0,
-        total_sessions: 0,
-        total_requests: 0,
-        by_model: [],
-        by_date: [],
-        by_project: []
-      }
+      return createEmptyStats()
     }
   })
 
-  // Get project usage statistics
+  // Get project usage statistics (Enhanced)
   ipcMain.handle('get-project-usage', async (_, projectPath: string) => {
     console.log('Main: get-project-usage called with', projectPath)
     try {
-      const stats = await getUsageStats(undefined, undefined, projectPath)
-      return (
-        stats.by_project[0] || {
+      const service = getEnhancedUsageService()
+      const result = await service.getEnhancedUsageStats(
+        undefined,
+        undefined,
+        projectPath,
+        CostModeValues.AUTO
+      )
+
+      if (Result.isSuccess(result)) {
+        const enhancedStats = Result.unwrap(result)
+        return {
+          project_path: projectPath,
+          project_name: getProjectName(projectPath),
+          total_cost: enhancedStats.totalCost,
+          total_tokens: enhancedStats.totalTokens,
+          session_count: enhancedStats.sessionBlocks.length,
+          request_count: enhancedStats.sessionBlocks.reduce(
+            (acc: number, block: any) => acc + block.entries.length,
+            0
+          ),
+          last_used: new Date().toISOString()
+        }
+      } else {
+        console.error('Error getting enhanced project usage:', result.error)
+        return {
           project_path: projectPath,
           project_name: getProjectName(projectPath),
           total_cost: 0,
           total_tokens: 0,
           session_count: 0,
+          request_count: 0,
           last_used: new Date().toISOString()
         }
-      )
+      }
     } catch (error) {
       console.error('Error getting project usage:', error)
       return {
@@ -253,6 +505,7 @@ export function setupUsageHandlers() {
         total_cost: 0,
         total_tokens: 0,
         session_count: 0,
+        request_count: 0,
         last_used: new Date().toISOString()
       }
     }
@@ -301,25 +554,36 @@ export function setupUsageHandlers() {
     }
   })
 
-  // Get session statistics (summary of current usage)
+  // Get session statistics (summary of current usage) (Enhanced)
   ipcMain.handle(
     'get-session-stats',
     async (_, since?: string, until?: string, order?: 'asc' | 'desc') => {
       console.log('Main: get-session-stats called with', { since, until, order })
       try {
-        // Get usage stats for the specified date range
-        const stats = await getUsageStats(since, until)
+        const service = getEnhancedUsageService()
+        const result = await service.getEnhancedUsageStats(
+          since,
+          until,
+          undefined,
+          CostModeValues.AUTO
+        )
 
-        // Return project usage data sorted by the specified order
-        const projectUsage = stats.by_project || []
+        if (Result.isSuccess(result)) {
+          const enhancedStats = Result.unwrap(result)
+          const legacyStats = convertToLegacyFormat(enhancedStats, since, until)
+          const projectUsage = legacyStats.by_project || []
 
-        if (order === 'asc') {
-          projectUsage.sort((a, b) => a.total_cost - b.total_cost)
+          if (order === 'asc') {
+            projectUsage.sort((a, b) => a.total_cost - b.total_cost)
+          } else {
+            projectUsage.sort((a, b) => b.total_cost - a.total_cost)
+          }
+
+          return projectUsage
         } else {
-          projectUsage.sort((a, b) => b.total_cost - a.total_cost)
+          console.error('Error getting enhanced session stats:', result.error)
+          return []
         }
-
-        return projectUsage
       } catch (error) {
         console.error('Error getting session stats:', error)
         return []
@@ -411,46 +675,6 @@ async function getUsageStats(
   }
 
   return stats
-}
-
-/**
- * Get usage for a specific session
- */
-async function getSessionUsage(sessionId: string): Promise<UsageEntry[]> {
-  const claudeDir = join(homedir(), '.claude', 'projects')
-  const entries: UsageEntry[] = []
-
-  try {
-    // Find the session file
-    const pattern = join(claudeDir, '**', `${sessionId}.jsonl`)
-    const files = await glob(pattern.replace(/\\/g, '/'))
-
-    for (const file of files) {
-      try {
-        const fileProjectPath = extractProjectPath(file)
-        const content = await fs.readFile(file, 'utf-8')
-        const lines = content.split('\n').filter((line) => line.trim())
-
-        for (const line of lines) {
-          try {
-            const json = JSON.parse(line)
-            const entry = parseUsageEntry(json, fileProjectPath)
-            if (entry) {
-              entries.push(entry)
-            }
-          } catch {
-            // Skip invalid JSON lines
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to read session file:', file, error)
-      }
-    }
-  } catch (error) {
-    console.warn('Failed to find session files:', error)
-  }
-
-  return entries
 }
 
 /**

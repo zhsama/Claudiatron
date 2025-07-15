@@ -39,6 +39,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@praha/byethrow": "^0.6.2",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "better-sqlite3": "^12.2.0",
     "electron-updater": "^6.3.9",
