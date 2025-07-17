@@ -598,7 +598,7 @@ export const api = {
   async saveSystemPrompt(content: string): Promise<string> {
     try {
       const api = getWindowApi()
-      return await api.saveSystemPrompt({ content })
+      return await api.saveSystemPrompt(content)
     } catch (error) {
       console.error('Failed to save system prompt:', error)
       throw error

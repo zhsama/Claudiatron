@@ -40,8 +40,8 @@ export function setupAgentsHandlers() {
       agentData: {
         name: string
         icon: string
-        system_prompt: string
-        default_task?: string
+        systemPrompt: string
+        defaultTask?: string
         model?: string
         enable_file_read?: boolean
         enable_file_write?: boolean
@@ -51,7 +51,19 @@ export function setupAgentsHandlers() {
     ) => {
       console.log('Main: create-agent called with', agentData)
       try {
-        return await agentService.create(agentData)
+        // 转换为数据库需要的 snake_case 格式
+        const dbData = {
+          name: agentData.name,
+          icon: agentData.icon,
+          system_prompt: agentData.systemPrompt,
+          default_task: agentData.defaultTask,
+          model: agentData.model,
+          enable_file_read: agentData.enable_file_read,
+          enable_file_write: agentData.enable_file_write,
+          enable_network: agentData.enable_network,
+          hooks: agentData.hooks
+        }
+        return await agentService.create(dbData)
       } catch (error) {
         console.error('Error creating agent:', error)
         throw new Error('Failed to create agent')
