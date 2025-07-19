@@ -33,6 +33,7 @@
       "command": "命令",
       "arguments": "参数",
       "url": "URL",
+      "headers": "请求头",
       "environmentVariables": "环境变量"
     }
   },
@@ -78,6 +79,13 @@
         "add": "添加变量",
         "keyPlaceholder": "KEY",
         "valuePlaceholder": "value"
+      },
+      "headers": {
+        "label": "HTTP Headers",
+        "add": "添加 Header",
+        "keyPlaceholder": "Header-Name",
+        "valuePlaceholder": "Header-Value",
+        "description": "用于 SSE 和 HTTP 传输的 HTTP 头部信息（如身份验证）"
       }
     },
     "actions": {
@@ -89,7 +97,9 @@
       "title": "示例命令",
       "postgres": "• Postgres: /path/to/postgres-mcp-server --connection-string \"postgresql://...\"",
       "weather": "• Weather API: /usr/local/bin/weather-cli --api-key ABC123",
-      "sseServer": "• SSE 服务器: https://api.example.com/mcp/stream"
+      "sseServer": "• SSE 服务器: https://api.example.com/mcp/stream",
+      "httpServer": "• Streamable HTTP: https://api.example.com/mcp - Streamable HTTP MCP 服务器",
+      "httpHeaders": "• HTTP Headers: Authorization: Bearer token123, X-API-Key: your-api-key"
     },
     "validation": {
       "nameRequired": "服务器名称是必需的",

@@ -33,6 +33,7 @@
       "command": "Command",
       "arguments": "Arguments",
       "url": "URL",
+      "headers": "Headers",
       "environmentVariables": "Environment Variables"
     }
   },
@@ -78,6 +79,13 @@
         "add": "Add Variable",
         "keyPlaceholder": "KEY",
         "valuePlaceholder": "value"
+      },
+      "headers": {
+        "label": "HTTP Headers",
+        "add": "Add Header",
+        "keyPlaceholder": "Header-Name",
+        "valuePlaceholder": "Header-Value",
+        "description": "HTTP headers for SSE and HTTP transports (e.g., authentication)"
       }
     },
     "actions": {
@@ -89,7 +97,8 @@
       "title": "Example Commands",
       "postgres": "• Postgres: /path/to/postgres-mcp-server --connection-string \"postgresql://...\"",
       "weather": "• Weather API: /usr/local/bin/weather-cli --api-key ABC123",
-      "sseServer": "• SSE Server: https://api.example.com/mcp/stream"
+      "sseServer": "• SSE Server: https://api.example.com/mcp/stream",
+      "httpServer": "• HTTP Server: https://api.example.com/mcp"
     },
     "validation": {
       "nameRequired": "Server name is required",

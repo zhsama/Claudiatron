@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Terminal, Globe, Trash2, Info, Loader2 } from 'lucide-react'
+import { Plus, Terminal, Globe, Network, Trash2, Info, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,7 +38,7 @@ interface EnvironmentVariable {
  */
 export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onError }) => {
   const { t } = useTranslation('mcp')
-  const [transport, setTransport] = useState<'stdio' | 'sse'>('stdio')
+  const [transport, setTransport] = useState<'stdio' | 'sse' | 'http'>('stdio')
   const [saving, setSaving] = useState(false)
 
   // Stdio server state
@@ -53,11 +53,19 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
   const [sseUrl, setSseUrl] = useState('')
   const [sseScope, setSseScope] = useState('local')
   const [sseEnvVars, setSseEnvVars] = useState<EnvironmentVariable[]>([])
+  const [sseHeaders, setSseHeaders] = useState<EnvironmentVariable[]>([])
+
+  // HTTP server state
+  const [httpName, setHttpName] = useState('')
+  const [httpUrl, setHttpUrl] = useState('')
+  const [httpScope, setHttpScope] = useState('local')
+  const [httpEnvVars, setHttpEnvVars] = useState<EnvironmentVariable[]>([])
+  const [httpHeaders, setHttpHeaders] = useState<EnvironmentVariable[]>([])
 
   /**
    * Adds a new environment variable
    */
-  const addEnvVar = (type: 'stdio' | 'sse') => {
+  const addEnvVar = (type: 'stdio' | 'sse' | 'http') => {
     const newVar: EnvironmentVariable = {
       id: `env-${Date.now()}`,
       key: '',
@@ -66,8 +74,27 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
 
     if (type === 'stdio') {
       setStdioEnvVars((prev) => [...prev, newVar])
-    } else {
+    } else if (type === 'sse') {
       setSseEnvVars((prev) => [...prev, newVar])
+    } else {
+      setHttpEnvVars((prev) => [...prev, newVar])
+    }
+  }
+
+  /**
+   * Adds a new header
+   */
+  const addHeader = (type: 'sse' | 'http') => {
+    const newHeader: EnvironmentVariable = {
+      id: `header-${Date.now()}`,
+      key: '',
+      value: ''
+    }
+
+    if (type === 'sse') {
+      setSseHeaders((prev) => [...prev, newHeader])
+    } else {
+      setHttpHeaders((prev) => [...prev, newHeader])
     }
   }
 
@@ -75,26 +102,54 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
    * Updates an environment variable
    */
   const updateEnvVar = (
-    type: 'stdio' | 'sse',
+    type: 'stdio' | 'sse' | 'http',
     id: string,
     field: 'key' | 'value',
     value: string
   ) => {
     if (type === 'stdio') {
       setStdioEnvVars((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)))
-    } else {
+    } else if (type === 'sse') {
       setSseEnvVars((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)))
+    } else {
+      setHttpEnvVars((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)))
+    }
+  }
+
+  /**
+   * Updates a header
+   */
+  const updateHeader = (
+    type: 'sse' | 'http',
+    id: string,
+    field: 'key' | 'value',
+    value: string
+  ) => {
+    if (type === 'sse') {
+      setSseHeaders((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)))
+    } else {
+      setHttpHeaders((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)))
     }
   }
 
   /**
    * Removes an environment variable
    */
-  const removeEnvVar = (type: 'stdio' | 'sse', id: string) => {
+  const removeEnvVar = (type: 'stdio' | 'sse' | 'http', id: string) => {
     if (type === 'stdio') {
       setStdioEnvVars((prev) => prev.filter((v) => v.id !== id))
-    } else {
+    } else if (type === 'sse') {
       setSseEnvVars((prev) => prev.filter((v) => v.id !== id))
+    } else {
+      setHttpEnvVars((prev) => prev.filter((v) => v.id !== id))
+    }
+  }
+
+  const removeHeader = (type: 'sse' | 'http', id: string) => {
+    if (type === 'sse') {
+      setSseHeaders((prev) => prev.filter((v) => v.id !== id))
+    } else {
+      setHttpHeaders((prev) => prev.filter((v) => v.id !== id))
     }
   }
 
@@ -186,13 +241,25 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
         {} as Record<string, string>
       )
 
-      const result = await api.mcpAdd(sseName, 'sse', undefined, [], env, sseUrl, sseScope)
+      const result = await api.mcpAdd(
+        sseName,
+        'sse',
+        undefined,
+        [],
+        env,
+        sseUrl,
+        sseScope,
+        sseHeaders
+          .filter(({ key, value }) => key.trim() && value.trim())
+          .map(({ key, value }) => ({ key: key.trim(), value: value.trim() }))
+      )
 
       if (result.success) {
         // Reset form
         setSseName('')
         setSseUrl('')
         setSseEnvVars([])
+        setSseHeaders([])
         setSseScope('local')
         onServerAdded()
       } else {
@@ -207,42 +274,122 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
   }
 
   /**
-   * Renders environment variable inputs
+   * Validates and adds an HTTP server
    */
-  const renderEnvVars = (type: 'stdio' | 'sse', envVars: EnvironmentVariable[]) => {
+  const handleAddHttpServer = async () => {
+    if (!httpName.trim()) {
+      onError(t('addServer.validation.nameRequired'))
+      return
+    }
+
+    if (!httpUrl.trim()) {
+      onError(t('addServer.validation.urlRequired'))
+      return
+    }
+
+    try {
+      setSaving(true)
+
+      // Convert env vars to object
+      const env = httpEnvVars.reduce(
+        (acc, { key, value }) => {
+          if (key.trim() && value.trim()) {
+            acc[key] = value
+          }
+          return acc
+        },
+        {} as Record<string, string>
+      )
+
+      const result = await api.mcpAdd(
+        httpName,
+        'http',
+        undefined,
+        [],
+        env,
+        httpUrl,
+        httpScope,
+        httpHeaders
+          .filter(({ key, value }) => key.trim() && value.trim())
+          .map(({ key, value }) => ({ key: key.trim(), value: value.trim() }))
+      )
+
+      console.log('Frontend: HTTP server add result:', result)
+
+      if (result.success) {
+        // Reset form
+        setHttpName('')
+        setHttpUrl('')
+        setHttpEnvVars([])
+        setHttpHeaders([])
+        setHttpScope('local')
+        onServerAdded()
+      } else {
+        onError(result.message)
+      }
+    } catch (error) {
+      onError('Failed to add Streamable HTTP server')
+      console.error('Failed to add Streamable HTTP server:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  /**
+   * Renders key-value pair inputs (environment variables or headers)
+   */
+  const renderKeyValuePairs = (
+    _type: 'stdio' | 'sse' | 'http',
+    dataType: 'env' | 'headers',
+    items: EnvironmentVariable[],
+    onAdd: () => void,
+    onUpdate: (id: string, field: 'key' | 'value', value: string) => void,
+    onRemove: (id: string) => void
+  ) => {
+    const isHeaders = dataType === 'headers'
+    const separator = isHeaders ? ':' : '='
+
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">
-            {t('addServer.fields.environmentVariables.label')}
+            {isHeaders ? 'HTTP Headers' : t('addServer.fields.environmentVariables.label')}
           </Label>
-          <Button variant="outline" size="sm" onClick={() => addEnvVar(type)} className="gap-2">
+          <Button variant="outline" size="sm" onClick={onAdd} className="gap-2">
             <Plus className="h-3 w-3" />
-            {t('addServer.fields.environmentVariables.add')}
+            {isHeaders ? '添加 Header' : t('addServer.fields.environmentVariables.add')}
           </Button>
         </div>
 
-        {envVars.length > 0 && (
+        {items.length > 0 && (
           <div className="space-y-2">
-            {envVars.map((envVar) => (
-              <div key={envVar.id} className="flex items-center gap-2">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center gap-2">
                 <Input
-                  placeholder={t('addServer.fields.environmentVariables.keyPlaceholder')}
-                  value={envVar.key}
-                  onChange={(e) => updateEnvVar(type, envVar.id, 'key', e.target.value)}
+                  placeholder={
+                    isHeaders
+                      ? 'Header-Name'
+                      : t('addServer.fields.environmentVariables.keyPlaceholder')
+                  }
+                  value={item.key}
+                  onChange={(e) => onUpdate(item.id, 'key', e.target.value)}
                   className="flex-1 font-mono text-sm"
                 />
-                <span className="text-muted-foreground">=</span>
+                <span className="text-muted-foreground">{separator}</span>
                 <Input
-                  placeholder={t('addServer.fields.environmentVariables.valuePlaceholder')}
-                  value={envVar.value}
-                  onChange={(e) => updateEnvVar(type, envVar.id, 'value', e.target.value)}
+                  placeholder={
+                    isHeaders
+                      ? 'Header-Value'
+                      : t('addServer.fields.environmentVariables.valuePlaceholder')
+                  }
+                  value={item.value}
+                  onChange={(e) => onUpdate(item.id, 'value', e.target.value)}
                   className="flex-1 font-mono text-sm"
                 />
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeEnvVar(type, envVar.id)}
+                  onClick={() => onRemove(item.id)}
                   className="h-8 w-8 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -255,6 +402,17 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
     )
   }
 
+  const renderEnvVars = (type: 'stdio' | 'sse' | 'http', envVars: EnvironmentVariable[]) => {
+    return renderKeyValuePairs(
+      type,
+      'env',
+      envVars,
+      () => addEnvVar(type),
+      (id, field, value) => updateEnvVar(type, id, field, value),
+      (id) => removeEnvVar(type, id)
+    )
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -262,8 +420,8 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
         <p className="text-sm text-muted-foreground mt-1">{t('addServer.description')}</p>
       </div>
 
-      <Tabs value={transport} onValueChange={(v) => setTransport(v as 'stdio' | 'sse')}>
-        <TabsList className="grid w-full grid-cols-2 max-w-sm mb-6">
+      <Tabs value={transport} onValueChange={(v) => setTransport(v as 'stdio' | 'sse' | 'http')}>
+        <TabsList className="grid w-full grid-cols-3 max-w-lg mb-6">
           <TabsTrigger value="stdio" className="gap-2">
             <Terminal className="h-4 w-4 text-amber-500" />
             {t('addServer.transport.stdio')}
@@ -271,6 +429,10 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
           <TabsTrigger value="sse" className="gap-2">
             <Globe className="h-4 w-4 text-emerald-500" />
             {t('addServer.transport.sse')}
+          </TabsTrigger>
+          <TabsTrigger value="http" className="gap-2">
+            <Network className="h-4 w-4 text-blue-500" />
+            Streamable HTTP
           </TabsTrigger>
         </TabsList>
 
@@ -412,6 +574,15 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
               </div>
 
               {renderEnvVars('sse', sseEnvVars)}
+
+              {renderKeyValuePairs(
+                'sse',
+                'headers',
+                sseHeaders,
+                () => addHeader('sse'),
+                (id, field, value) => updateHeader('sse', id, field, value),
+                (id) => removeHeader('sse', id)
+              )}
             </div>
 
             <div className="pt-2">
@@ -435,6 +606,89 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
             </div>
           </Card>
         </TabsContent>
+
+        {/* HTTP Server */}
+        <TabsContent value="http" className="space-y-6">
+          <Card className="p-6 space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="http-name">{t('addServer.fields.name.label')}</Label>
+                <Input
+                  id="http-name"
+                  placeholder={t('addServer.fields.name.placeholder')}
+                  value={httpName}
+                  onChange={(e) => setHttpName(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('addServer.fields.name.description')}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="http-url">{t('addServer.fields.url.label')}</Label>
+                <Input
+                  id="http-url"
+                  placeholder="https://api.example.com/mcp"
+                  value={httpUrl}
+                  onChange={(e) => setHttpUrl(e.target.value)}
+                  className="font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Streamable HTTP MCP 服务器的完整 URL
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="http-scope">{t('addServer.fields.scope.label')}</Label>
+                <Select value={httpScope} onValueChange={(value: string) => setHttpScope(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('addServer.fields.scope.placeholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="local">
+                      {t('addServer.fields.scope.options.local')}
+                    </SelectItem>
+                    <SelectItem value="project">
+                      {t('addServer.fields.scope.options.project')}
+                    </SelectItem>
+                    <SelectItem value="user">{t('addServer.fields.scope.options.user')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {renderEnvVars('http', httpEnvVars)}
+
+              {renderKeyValuePairs(
+                'http',
+                'headers',
+                httpHeaders,
+                () => addHeader('http'),
+                (id, field, value) => updateHeader('http', id, field, value),
+                (id) => removeHeader('http', id)
+              )}
+            </div>
+
+            <div className="pt-2">
+              <Button
+                onClick={handleAddHttpServer}
+                disabled={saving}
+                className="w-full gap-2 bg-primary hover:bg-primary/90"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('addServer.actions.adding')}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    添加 Streamable HTTP 服务器
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Example */}
@@ -449,6 +703,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({ onServerAdded, onErr
               <p>{t('addServer.examples.postgres')}</p>
               <p>{t('addServer.examples.weather')}</p>
               <p>{t('addServer.examples.sseServer')}</p>
+              <p>{t('addServer.examples.httpServer')}</p>
             </div>
           </div>
         </div>

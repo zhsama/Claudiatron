@@ -41,6 +41,7 @@ export interface MCPServer {
   args: string[]
   env: Record<string, string>
   url?: string
+  headers?: Record<string, string>
   scope: string
   is_active: boolean
   status: ServerStatus
@@ -86,7 +87,8 @@ export function setupMCPHandlers() {
         args,
         env,
         url,
-        scope
+        scope,
+        headers
       }: {
         name: string
         transport: string
@@ -95,18 +97,40 @@ export function setupMCPHandlers() {
         env: Record<string, string>
         url?: string
         scope: string
+        headers?: Array<{ key: string; value: string }>
       }
     ) => {
       console.log('Main: mcp-add called with', { name, transport, scope })
       try {
+        if (!name || !name.trim()) {
+          return {
+            success: false,
+            message: 'Server name is required',
+            server_name: undefined
+          }
+        }
+
         const cmdArgs = ['mcp', 'add']
 
         // Add scope flag
         cmdArgs.push('-s', scope)
 
-        // Add transport flag for SSE
+        // Add headers for SSE and HTTP transports
+        if (headers && headers.length > 0 && (transport === 'sse' || transport === 'http')) {
+          for (const header of headers) {
+            // Only add headers that have both non-empty key and value
+            if (header && header.key && header.key.trim() && header.value && header.value.trim()) {
+              const headerArg = `${header.key.trim()}: ${header.value.trim()}`
+              cmdArgs.push('-H', headerArg)
+            }
+          }
+        }
+
+        // Add transport flag for SSE and HTTP
         if (transport === 'sse') {
           cmdArgs.push('--transport', 'sse')
+        } else if (transport === 'http') {
+          cmdArgs.push('--transport', 'http')
         }
 
         // Add environment variables
@@ -133,11 +157,11 @@ export function setupMCPHandlers() {
           }
           cmdArgs.push(command)
           cmdArgs.push(...args)
-        } else if (transport === 'sse') {
+        } else if (transport === 'sse' || transport === 'http') {
           if (!url) {
             return {
               success: false,
-              message: 'URL is required for SSE transport',
+              message: `URL is required for ${transport.toUpperCase()} transport`,
               server_name: undefined
             }
           }
@@ -173,14 +197,21 @@ export function setupMCPHandlers() {
   // List all configured MCP servers
   ipcMain.handle('mcp-list', async () => {
     console.log('Main: mcp-list called')
-    const result = await executeClaudeMCPCommand(['mcp', 'list'])
 
-    if (result.success && result.data) {
-      const servers = parseMCPServerList(result.data)
-      console.log('Main: mcp-list returning', servers.length, 'servers')
-      return servers
-    } else {
-      console.error('Error listing MCP servers:', result.error)
+    try {
+      // Get the server list from Claude CLI
+      const result = await executeClaudeMCPCommand(['mcp', 'list'])
+
+      if (result.success && result.data) {
+        const servers = parseMCPServerList(result.data)
+        console.log('Main: mcp-list returning', servers.length, 'servers')
+        return servers
+      } else {
+        console.error('Error listing MCP servers:', result.error)
+        return []
+      }
+    } catch (error) {
+      console.error('Error in mcp-list:', error)
       return []
     }
   })
@@ -206,24 +237,87 @@ export function setupMCPHandlers() {
     }
   })
 
+  // Add a manual cleanup function for problematic servers
+  ipcMain.handle('mcp-cleanup-problematic-server', async () => {
+    try {
+      // Try to remove servers that might have been incorrectly parsed
+      const problemNames = [
+        'https',
+        'http',
+        'http://mcp-stream.example.com',
+        'https://mcp-stream.example.com'
+      ]
+
+      for (const name of problemNames) {
+        try {
+          const result = await executeClaudeMCPCommand(['mcp', 'remove', name])
+          if (result.success) {
+            return {
+              success: true,
+              message: `Successfully removed problematic server: ${name}`
+            }
+          }
+        } catch (e) {
+          // Continue to next problematic server name
+        }
+      }
+
+      return {
+        success: false,
+        message: 'Could not find problematic server to remove'
+      }
+    } catch (error) {
+      console.error('Cleanup error:', error)
+      return {
+        success: false,
+        message: 'Cleanup failed'
+      }
+    }
+  })
+
   // Remove an MCP server
   ipcMain.handle('mcp-remove', async (_, { name }: { name: string }) => {
     console.log('Main: mcp-remove called with', name, 'type:', typeof name)
     console.log('Main: mcp-remove name is:', JSON.stringify(name))
-    const result = await executeClaudeMCPCommand(['mcp', 'remove', name])
 
-    if (result.success && result.data) {
-      return {
-        success: true,
-        message: result.data.trim(),
-        error: undefined
+    // Try removal with different scopes to handle scope mismatch issues
+    const scopes = ['local', 'user', 'project']
+
+    for (const scope of scopes) {
+      console.log(`Trying to remove ${name} from ${scope} scope`)
+      try {
+        const result = await executeClaudeMCPCommand(['mcp', 'remove', '-s', scope, name])
+
+        console.log(`Remove result for ${scope} scope:`, {
+          success: result.success,
+          data: result.data,
+          error: result.error
+        })
+
+        if (result.success) {
+          return {
+            success: true,
+            message: `Server "${name}" removed from ${scope} scope: ${result.data?.trim() || 'Success'}`,
+            error: undefined
+          }
+        }
+      } catch (error) {
+        console.log(`Failed to remove ${name} from ${scope} scope:`, error)
       }
-    } else {
-      console.error('Error removing MCP server:', result.error)
-      return {
-        success: false,
-        message: result.error?.message || 'Failed to remove MCP server',
-        error: result.error
+    }
+
+    return {
+      success: false,
+      message: `Failed to remove server "${name}". It may not exist or may have permission issues.`,
+      error: {
+        type: 'SERVER_NOT_FOUND',
+        message: `Server "${name}" not found in any scope`,
+        suggestions: [
+          'Check if the server name is correct',
+          'Refresh the server list',
+          'Try removing from specific scope manually'
+        ],
+        technical_details: `Attempted to remove from scopes: ${scopes.join(', ')}`
       }
     }
   })
@@ -417,7 +511,7 @@ export function setupMCPHandlers() {
   ipcMain.handle('mcp-export-to-claude-desktop', async () => {
     console.log('Main: mcp-export-to-claude-desktop called')
     try {
-      const servers = await parseMCPServerList(await executeClaudeMCPCommandLegacy(['mcp', 'list']))
+      const servers = parseMCPServerList(await executeClaudeMCPCommandLegacy(['mcp', 'list']))
 
       const mcpServers: Record<string, any> = {}
 
@@ -677,6 +771,14 @@ function parseMCPServerList(output: string): MCPServer[] {
     return servers
   }
 
+  // Try to detect scope from CLI output context
+  // Local scope servers might be indicated by .mcp.json or project-specific context
+  const isLocalScope =
+    output.includes('.mcp.json') ||
+    output.includes('local scope') ||
+    output.includes('project-specific')
+  const defaultScope = isLocalScope ? 'local' : 'user'
+
   // Parse the text output
   const lines = trimmed.split('\n')
   let i = 0
@@ -709,12 +811,28 @@ function parseMCPServerList(output: string): MCPServer[] {
           i++
         }
 
-        // Parse the command
+        // Parse the command with improved URL detection
         if (fullCommand.startsWith('http://') || fullCommand.startsWith('https://')) {
-          transport = 'sse'
-          // Clean up URL by removing transport type annotations like (HTTP) or (SSE)
-          url = fullCommand.replace(/\s+\((HTTP|SSE)\)$/, '')
+          // This is a URL-based server (HTTP or SSE)
+          if (fullCommand.includes('(HTTP)')) {
+            transport = 'http'
+            // Clean up URL by removing transport type annotations
+            url = fullCommand.replace(/\s+\(HTTP\)$/, '')
+          } else if (fullCommand.includes('(SSE)')) {
+            transport = 'sse'
+            // Clean up URL by removing transport type annotations
+            url = fullCommand.replace(/\s+\(SSE\)$/, '')
+          } else {
+            // Default to SSE for backward compatibility
+            transport = 'sse'
+            url = fullCommand
+          }
+          // Reset command and args for URL-based transports
+          command = ''
+          args = []
         } else {
+          // This is a stdio command
+          transport = 'stdio'
           const parts = fullCommand.split(/\s+/)
           if (parts.length > 0) {
             command = parts[0]
@@ -729,7 +847,8 @@ function parseMCPServerList(output: string): MCPServer[] {
           args,
           env: {}, // Environment variables aren't shown in list output
           url,
-          scope: 'user', // Default scope, actual scope isn't shown in list
+          headers: {}, // Headers aren't shown in basic list output but initialize empty
+          scope: defaultScope, // Use detected scope instead of hardcoded 'user'
           is_active: true,
           status: {
             running: false,
@@ -787,6 +906,7 @@ function parseMCPServerDetails(output: string, name: string): MCPServer {
     args,
     env,
     url,
+    headers: {},
     scope: 'user', // Default scope
     is_active: true,
     status: {

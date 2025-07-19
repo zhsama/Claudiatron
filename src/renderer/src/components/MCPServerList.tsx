@@ -227,16 +227,18 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                 </div>
               )}
 
-              {server.transport === 'sse' && server.url && !isExpanded && (
-                <div className="overflow-hidden">
-                  <p
-                    className="text-xs text-muted-foreground font-mono truncate pl-9"
-                    title={server.url}
-                  >
-                    {server.url}
-                  </p>
-                </div>
-              )}
+              {(server.transport === 'sse' || server.transport === 'http') &&
+                server.url &&
+                !isExpanded && (
+                  <div className="overflow-hidden">
+                    <p
+                      className="text-xs text-muted-foreground font-mono truncate pl-9"
+                      title={server.url}
+                    >
+                      {server.url}
+                    </p>
+                  </div>
+                )}
 
               {Object.keys(server.env).length > 0 && !isExpanded && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground pl-9">
@@ -245,6 +247,17 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                   </span>
                 </div>
               )}
+
+              {(server.transport === 'sse' || server.transport === 'http') &&
+                server.headers &&
+                Object.keys(server.headers).length > 0 &&
+                !isExpanded && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground pl-9">
+                    <span>
+                      {t('serverList.details.headers')}: {Object.keys(server.headers).length}
+                    </span>
+                  </div>
+                )}
             </div>
 
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
@@ -335,16 +348,46 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                 </div>
               )}
 
-              {server.transport === 'sse' && server.url && (
+              {(server.transport === 'sse' || server.transport === 'http') && server.url && (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    {t('serverList.details.url')}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {t('serverList.details.url')}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyCommand(server.url!, server.name)}
+                      className="h-6 px-2 text-xs hover:bg-primary/10"
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      {isCopied ? t('serverList.actions.copied') : t('serverList.actions.copy')}
+                    </Button>
+                  </div>
                   <p className="text-xs font-mono bg-muted/50 p-2 rounded break-all">
                     {server.url}
                   </p>
                 </div>
               )}
+
+              {(server.transport === 'sse' || server.transport === 'http') &&
+                server.headers &&
+                Object.keys(server.headers).length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {t('serverList.details.headers')}
+                    </p>
+                    <div className="text-xs font-mono bg-muted/50 p-2 rounded space-y-1">
+                      {Object.entries(server.headers).map(([key, value]) => (
+                        <div key={key} className="break-all">
+                          <span className="text-blue-600">{key}</span>
+                          <span className="text-muted-foreground mx-1">:</span>
+                          <span>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               {Object.keys(server.env).length > 0 && (
                 <div className="space-y-1">

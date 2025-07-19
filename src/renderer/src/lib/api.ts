@@ -363,6 +363,8 @@ export interface MCPServer {
   env: Record<string, string>
   /** URL endpoint (for SSE) */
   url?: string
+  /** HTTP headers (for SSE/HTTP) */
+  headers?: Record<string, string>
   /** Configuration scope: "local", "project", or "user" */
   scope: string
   /** Whether the server is currently active */
@@ -1463,11 +1465,12 @@ export const api = {
     args: string[] = [],
     env: Record<string, string> = {},
     url?: string,
-    scope: string = 'local'
+    scope: string = 'local',
+    headers?: Array<{ key: string; value: string }>
   ): Promise<AddServerResult> {
     try {
       const api = getWindowApi()
-      return await api.mcpAdd(name, transport, command, args, env, url, scope)
+      return await api.mcpAdd(name, transport, command, args, env, url, scope, headers)
     } catch (error) {
       console.error('Failed to add MCP server:', error)
       throw error
